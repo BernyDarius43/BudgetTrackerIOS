@@ -1,0 +1,61 @@
+{
+  "cli": {
+    "version": ">= 16.1.0",
+    "appVersionSource": "remote",
+    "requireCommit": true
+  },
+  "build": {
+    "base": {
+      "node": "22.14.0",
+      "env": {
+        "API_URL": "https://company.com/api"
+      },
+      "ios": {
+        "image": "latest",
+        "env": {
+          "PLATFORM": "ios"
+        }
+      }
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "extends": "base",
+      "env": {
+        "env": {
+          "API_URL": "https://company.com/api"
+        }
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "env": {
+        "API_URL": "https://company.com/api"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "extends":"base",
+      "node": "22.14.0",
+      "env": {
+       "API_URL": "https://company.com/api"
+      }
+    },
+    "ios": {
+      "resourceClass": "Medium",
+      "bundleIdentifier": "com.benny.budgetTrackerios"
+    }
+    
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6744070659"
+      }
+    }
+  }
+}

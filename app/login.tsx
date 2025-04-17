@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Button } from 'react-native';
 import { useAuth } from '../context/authContext/authContext';
-import { loginUser } from '@/services/authService';
 import { useRouter  } from 'expo-router';
 
 const LoginPage = () => {
@@ -15,12 +14,14 @@ const LoginPage = () => {
   
   const handleLoginPress = () => {
     loginUser(email, password);  // triggers AuthProvider's login, which manages loading internally
+    console.log("handleLoginPress is called");
   };
 
   // If already logged in, navigate to the protected home screen
   useEffect(() => {
     if (userLoggedIn) {
       router.replace('/(tabs)/home-user');
+      console.log("useEffect is called in login.tsx");
     }
   }, [userLoggedIn]);
   
@@ -56,22 +57,6 @@ const LoginPage = () => {
     <Text style={styles.buttonText}>Sign In</Text>
   )}
 </TouchableOpacity>
-
-        {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text
-        onPress={() => {
-          handleLogin();
-        }}>
-        Sign In
-      </Text>
-        </View> */}
-        {/* <Button title='Login' style={styles.button} onPress={handleLogin} disabled={isSigningIn}>
-          {isSigningIn ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </Button> */}
         {error && <Text style={styles.error}>{error}</Text>}
       </View>
     </View>

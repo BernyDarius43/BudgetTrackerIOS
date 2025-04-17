@@ -5,7 +5,7 @@ import { useAuth } from '@/context/authContext/authContext';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 
 const ProfileScreen = () => {
-  const { currentUser, userLoggedIn } = useAuth();
+  const { currentUser, userLoggedIn, logoutUser } = useAuth();
   const router = useRouter();
 
   if (!userLoggedIn || !currentUser) {
@@ -14,6 +14,11 @@ const ProfileScreen = () => {
         <ActivityIndicator size="large" color="#3b82f6" />
       </View>
     );
+  }
+
+  const handleLogoutPress = () => {
+    logoutUser()
+    router.replace('/home')
   }
 
   return (
@@ -29,6 +34,13 @@ const ProfileScreen = () => {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => router.push('/(tabs)/profile/edit-profile')}
+        >
+          <Text style={styles.editButtonText}>Edit Profile</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogoutPress}
         >
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
@@ -52,6 +64,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   editButton: {
+    backgroundColor: '#3b82f6',
+    padding: 14,
+    borderRadius: 8,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  logoutButton: {
     backgroundColor: '#3b82f6',
     padding: 14,
     borderRadius: 8,

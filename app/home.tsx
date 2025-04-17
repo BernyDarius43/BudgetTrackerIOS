@@ -10,6 +10,7 @@ const HomePage: React.FC = () => {
 
   const handleRegister = () => {
     router.replace('/register');
+    console.log("handleRegister is called");
   };
 
   return (

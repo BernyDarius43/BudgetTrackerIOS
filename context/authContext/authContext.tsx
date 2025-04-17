@@ -15,7 +15,7 @@ import {
   User,
 } from 'firebase/auth';
 import { auth } from '@/services/firebase/firebase';
-import { createUser, signInUser } from '@/services/firebase/auth';
+import { createUser, signInUser, signOutUser } from '@/services/firebase/auth';
 import { router } from 'expo-router';
 // 1. Define the type for the auth context.
 export type AuthContextType = {
@@ -29,6 +29,7 @@ export type AuthContextType = {
   loading: boolean;
   loginUser: (email: string, password: string) => Promise<void>;
   registerUser: (email: string, password: string, confirmPassword:string) => Promise<void>;
+  logoutUser: () =>Promise<void>;
 };
 
 // 2. Create and export the context.
@@ -137,6 +138,25 @@ const registerUser  = async (email: string, password: string,confirmPassword: st
         }
 }
 
+const logoutUser = async () => {
+  if (currentUser) {
+    try {
+      setLoading(true);
+      await logoutUser
+    } catch (error) {
+      console.log('Error while login out. Please try again.', error);
+      
+    } finally {
+      setLoading(false)
+      setAuthMongoUser(null)
+      setUserLoggedIn(false)
+      setIsRegistering(false)
+      setCurrentUser(null)
+      setIsSigningIn(false)
+    }
+  }
+}
+
   // Update Firebase user profile and local state.
   const updateUserProfile = useCallback(
     async ({ uid, displayName, email }: { uid: string; displayName: string; email: string }): Promise<void> => {
@@ -159,9 +179,10 @@ const registerUser  = async (email: string, password: string,confirmPassword: st
       updateUserProfile,
       loading,
       loginUser,
-      registerUser
+      registerUser,
+      logoutUser
     }),
-    [userLoggedIn, isEmailUser, currentUser, authMongoUser, setAuthMongoUser, updateUserProfile, loading,loginUser,registerUser]
+    [userLoggedIn, isEmailUser, currentUser, authMongoUser, setAuthMongoUser, updateUserProfile, loading,loginUser,registerUser, logoutUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

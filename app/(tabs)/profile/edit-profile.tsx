@@ -34,11 +34,11 @@ const EditProfileScreen = () => {
 
     try {
       setLoading(true);
-      await updateUserProfile({
-        uid: currentUser.uid,
-        displayName: name,
-        email,
-      });
+      // await updateUserProfile({
+      //   uid: currentUser.uid,
+      //   displayName: name,
+      //   email,
+      // });
       Alert.alert('Success', 'Profile updated successfully.');
       router.back();
     } catch (error) {

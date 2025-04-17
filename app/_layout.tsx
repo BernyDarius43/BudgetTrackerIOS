@@ -6,34 +6,54 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Redirect } from 'expo-router';
 import { AuthProvider, useAuth } from '../context/authContext/authContext';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useEffect } from 'react';
+import { StrictMode, useEffect } from 'react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-// A small component to handle authentication redirection.
+// Component to handle authentication-based redirection.
 function AuthHandler() {
   const { userLoggedIn } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    console.log();
-    
-      const targetRoute = userLoggedIn ? '/(tabs)/home-user' : '/home';
-      setTimeout(() => {
-        router.replace(targetRoute);
-      }, 0);
+    const targetRoute = userLoggedIn ? '/(tabs)/home-user' : '/home';
+    // Slight delay to ensure navigation happens after the initial render.
+    setTimeout(() => {
+      router.replace(targetRoute);
+    }, 0);
   }, [userLoggedIn, router]);
 
-  return null
+  return null;
 }
 
+
 export default function RootLayout() {
+  // Load custom fonts.
+  const [fontsLoaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    // Add other fonts here if needed
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      // Hide the splash screen as soon as fonts are loaded.
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  // If fonts are not loaded, don't render anything yet (keep splash screen visible).
+  if (!fontsLoaded) {
+    return null;
+  }
+  
   return (
+    <StrictMode>
     <AuthProvider>
       <AuthHandler />
       <Slot />
     </AuthProvider>
+    </StrictMode>
   );
 }
 

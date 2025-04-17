@@ -1,4 +1,5 @@
 // App.js
+import 'expo-dev-client';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthProvider } from './context/authContext/authContext';

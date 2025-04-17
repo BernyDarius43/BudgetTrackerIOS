@@ -22,9 +22,7 @@
       "distribution": "internal",
       "extends": "base",
       "env": {
-        "env": {
           "API_URL": "https://company.com/api"
-        }
       },
       "ios": {
         "simulator": true
@@ -46,8 +44,7 @@
       }
     },
     "ios": {
-      "resourceClass": "Medium",
-      "bundleIdentifier": "com.benny.budgetTrackerios"
+      "resourceClass": "medium"
     }
     
   },

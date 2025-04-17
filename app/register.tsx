@@ -7,9 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Button,
 } from 'react-native';
-import { registerUser } from '@/services/authService';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/authContext/authContext';
 
@@ -25,6 +23,7 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegisterPress = async () => {
     registerUser(email,password,confirmPassword)
+    console.log("handleRegisterPress is called");
   };
 
   return (

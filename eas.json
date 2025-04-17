@@ -22,7 +22,7 @@
       "distribution": "internal",
       "extends": "base",
       "env": {
-          "API_URL": "https://company.com/api"
+        "API_URL": "https://company.com/api"
       },
       "ios": {
         "simulator": true
@@ -37,16 +37,23 @@
     },
     "production": {
       "autoIncrement": true,
-      "extends":"base",
+      "extends": "base",
       "node": "22.14.0",
       "env": {
-       "API_URL": "https://company.com/api"
+        "API_URL": "https://company.com/api"
       }
     },
     "ios": {
       "resourceClass": "medium"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development"
     }
-    
   },
   "submit": {
     "production": {

@@ -22,7 +22,6 @@ const ProfileScreen = () => {
   }
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: '#f0f0f0', dark: '#1a1a1a' }} headerImage={<></>}>
       <View style={styles.contentContainer}>
         <Text className="title">Your Profile</Text>
         <Text className="subtitle">Display Name</Text>
@@ -33,7 +32,7 @@ const ProfileScreen = () => {
 
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => router.push('/(tabs)/profile/edit-profile')}
+          onPress={() => router.replace('/edit-profile')}
         >
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
@@ -42,10 +41,9 @@ const ProfileScreen = () => {
           style={styles.logoutButton}
           onPress={handleLogoutPress}
         >
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+          <Text style={styles.editButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
-    </ParallaxScrollView>
   );
 };
 
@@ -58,7 +56,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   contentContainer: {
-    padding: 16,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sectionMargin: {
     marginTop: 16,

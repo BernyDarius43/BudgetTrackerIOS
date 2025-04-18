@@ -23,6 +23,7 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegisterPress = async () => {
     registerUser(email,password,confirmPassword)
+    console.log("Email:",email,"Password:",password,"Comfirm password:",confirmPassword);
     console.log("handleRegisterPress is called");
   };
 

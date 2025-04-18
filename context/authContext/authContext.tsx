@@ -62,6 +62,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsEmailUser(!!user?.email);
       setLoading(false);
       console.log('Auth state updated:', user, 'loading:', loading);
+      console.log('UseEffect is called in authContext.tsx');
+      
     });
     return () => unsubscribe();
   }, []);

@@ -9,6 +9,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 export default function TabsLayout() {
   const { userLoggedIn } = useAuth();
 
+  
   // If not authenticated, redirect to the login screen.
   if (!userLoggedIn) {
     return <Redirect href="/login" />;

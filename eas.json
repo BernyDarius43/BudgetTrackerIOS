@@ -1,0 +1,75 @@
+{
+  "cli": {
+    "version": ">= 16.1.0",
+    "appVersionSource": "remote",
+    "requireCommit": true
+  },
+  "build": {
+    "base": {
+      "node": "22.14.0",
+      "env": {
+        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+      },
+      "ios": {
+        "image": "latest",
+        "env": {
+          "PLATFORM": "ios"
+        }
+      }
+    },
+    "development": {
+      "channel": "development",
+      "developmentClient": true,
+      "distribution": "internal",
+      "extends": "base",
+      "env": {
+        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+      }
+    },
+    "preview": {
+      "channel": "preview",
+      "extends": "base",
+      "distribution": "internal",
+      "env": {
+        "API_URL": "http://192.168.2.16:1738/api/v1"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "autoIncrement": true,
+      "extends": "base",
+      "node": "22.14.0",
+      "env": {
+        "API_URL": "http://192.168.2.16:1738/api/v1"
+      }
+    },
+    "ios": {
+      "resourceClass": "medium"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6744070659"
+      }
+    },
+    "development": {
+      "ios": {
+        "ascAppId": "6744070659"
+      }
+    },
+    "preview": {
+      "ios": {
+        "ascAppId": "6744070659"
+      }
+    }
+  }
+}

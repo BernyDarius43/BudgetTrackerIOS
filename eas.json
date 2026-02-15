@@ -2,7 +2,7 @@
   "cli": {
     "version": ">= 16.1.0",
     "appVersionSource": "remote",
-    "requireCommit": true
+    "requireCommit": false
   },
   "build": {
     "base": {
@@ -40,7 +40,7 @@
       "extends": "base",
       "node": "22.14.0",
       "env": {
-        "API_URL": "http://192.168.2.16:1738/api/v1"
+        "API_URL": "https://budgettrackerapi-production.up.railway.app/api/v1"
       }
     },
     "ios": {

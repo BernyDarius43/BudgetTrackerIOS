@@ -11,7 +11,7 @@
     "ios": {
       "buildNumber": "1.0.1",
       "supportsTablet": true,
-      "bundleIdentifier": "com.benny43.budgettrackerios",
+      "bundleIdentifier": "com.dariusmotion.budgettrackerios",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.benny43.budgettrackerios"
+      "package": "com.dariusmotion.budgettrackerios"
     },
     "web": {
       "bundler": "metro",

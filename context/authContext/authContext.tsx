@@ -17,10 +17,38 @@ import {
   signOut,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/services/firebase/firebaseConfig';
 import { signUpUser, signInUser, signOutUser } from '@/services/firebase/firebaseAuth';
 import { router } from 'expo-router';
 import api, { updateMe } from '@/services/api';
+import { getAuth } from 'firebase/auth';
+import { app } from '@/services/firebase/firebaseConfig';
+
+// ✅ Safe auth initialization with hot reload support
+let _authInstance: ReturnType<typeof getAuth> | null = null;
+
+function getAuthSafe() {
+  if (!_authInstance) {
+    try {
+      _authInstance = getAuth(app);
+      console.log('✅ Auth initialized in authContext');
+    } catch (error) {
+      console.error('❌ Failed to initialize auth:', error);
+      throw error;
+    }
+  }
+  return _authInstance;
+}
+
+
+// Get auth when the module loads (after app is initialized)
+const auth = (() => {
+  try {
+    return getAuth(app);
+  } catch (e) {
+    console.warn('[authContext] Auth init warning, retrying...', e);
+    return getAuth(app);
+  }
+})();
 
 // 1. Define the type for the auth context.
 export type AuthContextType = {

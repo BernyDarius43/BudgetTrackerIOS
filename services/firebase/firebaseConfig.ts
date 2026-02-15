@@ -1,6 +1,5 @@
-// services/firebase/firebaseConfig.ts
-import { getApp, getApps, initializeApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+// services/firebase/firebaseConfig.ts  
+import { getApp, getApps, initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -11,17 +10,13 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-  console.log('✅ Firebase app initialized');
-} else {
-  app = getApp();
-  console.log('ℹ️ Using existing Firebase app');
-}
+// Initialize app
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Get auth instance (Firebase handles React Native persistence automatically with AsyncStorage)
-const auth: Auth = getAuth(app);
+// ✅ Don't import auth here at all!
+export { app };
 
-export { app, auth };
+// ✅ Each file that needs auth should import it directly from firebase/auth
+// import { getAuth } from 'firebase/auth';
+// import { app } from './firebaseConfig';
+// const auth = getAuth(app);

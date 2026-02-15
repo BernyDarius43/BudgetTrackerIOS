@@ -1,7 +1,17 @@
 import axios, { AxiosHeaders } from 'axios';
 import { getAuth, getIdToken } from 'firebase/auth';
-import { auth } from '@/services/firebase/firebaseConfig';
 import Constants from 'expo-constants';
+import { app } from '@/services/firebase/firebaseConfig';
+
+// Get auth when the module loads (after app is initialized)
+const auth = (() => {
+  try {
+    return getAuth(app);
+  } catch (e) {
+    console.warn('[api.ts] Auth init warning, retrying...', e);
+    return getAuth(app);
+  }
+})();
 
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL 
   || 'http://192.168.2.23:5000/api/v1';

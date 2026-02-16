@@ -28,27 +28,10 @@ let _authInstance: ReturnType<typeof getAuth> | null = null;
 
 function getAuthSafe() {
   if (!_authInstance) {
-    try {
-      _authInstance = getAuth(app);
-      console.log('✅ Auth initialized in authContext');
-    } catch (error) {
-      console.error('❌ Failed to initialize auth:', error);
-      throw error;
-    }
+    _authInstance = getAuth(app);
   }
   return _authInstance;
 }
-
-
-// Get auth when the module loads (after app is initialized)
-const auth = (() => {
-  try {
-    return getAuth(app);
-  } catch (e) {
-    console.warn('[authContext] Auth init warning, retrying...', e);
-    return getAuth(app);
-  }
-})();
 
 // 1. Define the type for the auth context.
 export type AuthContextType = {
@@ -90,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
+    const auth = getAuthSafe(); // ✅ Get auth lazily
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
@@ -116,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const syncMongoUser = async () => {
+      const auth = getAuthSafe(); // ✅ Get auth lazily
       if (!auth.currentUser) return;
 
       if (isRegisteringRef.current) {
@@ -170,6 +155,7 @@ const loginUser = async (email: string, password: string) => {
         setErrorMessage('Email and password are required.');
         return;
       }
+      const auth = getAuthSafe(); // ✅ Get auth lazily
       // Sign into firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
@@ -232,6 +218,7 @@ const registerUser  = async (email: string, password: string,confirmPassword: st
         try {
             await signUpUser(trimmedEmail, password);
             // Ensure Firebase auth state is available
+            const auth = getAuthSafe(); // ✅ Get auth lazily
            if (!auth.currentUser) {
             throw new Error('Firebase user is not available after sign up.');
            }
@@ -279,7 +266,7 @@ const logoutUser = async () => {
         // Non-critical if backend logout fails
         console.warn('[Logout] Backend logout failed (non-critical):', error);
       }
-      
+      const auth = getAuthSafe(); // ✅ Get auth lazily
 
       // STEP 2: Sign out of Firebase
       console.log('[Logout] Step 2: Signing out of Firebase...');
@@ -323,6 +310,7 @@ const logoutUser = async () => {
     photoURL?: string;
     phoneNumber?: string;
   }) => {
+    const auth = getAuthSafe(); // ✅ Get auth lazily
     if (!auth.currentUser) return;
 
     // 1️⃣ Update Firebase

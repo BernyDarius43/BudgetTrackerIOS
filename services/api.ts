@@ -1,7 +1,7 @@
+// services/api.ts
 import axios, { AxiosHeaders } from 'axios';
-import { getAuth } from 'firebase/auth';
+import auth from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
-import { app } from '@/services/firebase/firebaseConfig';
 
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL 
   || 'http://192.168.2.23:5000/api/v1';
@@ -11,51 +11,37 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// 🔐 Attach Firebase ID token to every request
-api.interceptors.request.use(async (config) => {
-  // If caller already set Authorization, keep it
-  const existingAuth =
-    (config.headers instanceof AxiosHeaders && config.headers.get('Authorization')) ||
-    (!(config.headers instanceof AxiosHeaders) && (config.headers as any)?.Authorization);
+api.interceptors.request.use(
+  async (config) => {
+    const existingAuth =
+      (config.headers instanceof AxiosHeaders && config.headers.get('Authorization')) ||
+      (!(config.headers instanceof AxiosHeaders) && (config.headers as any)?.Authorization);
 
-  if (existingAuth) return config;
+    if (existingAuth) return config;
 
-  // ✅ Get auth INSIDE the interceptor (only when request is made)
-  let auth;
-  try {
-    auth = getAuth(app);
-  } catch (e) {
-    console.warn('[api.ts] Auth init failed:', e);
-    throw new Error('Not authenticated: Firebase auth initialization failed.');
-  }
+    const user = auth().currentUser;
+    if (!user) {
+      throw new Error('Not authenticated: Firebase user is missing.');
+    }
 
-  const user = auth.currentUser;
-  if (!user) {
-    throw new Error('Not authenticated: Firebase user is missing (blocked API request).');
-  }
+    const idToken = await user.getIdToken();
 
-  const idToken = await user.getIdToken();
+    if (config.headers instanceof AxiosHeaders) {
+      config.headers.set('Authorization', `Bearer ${idToken}`);
+    } else {
+      (config.headers as any) = {
+        ...(config.headers as any),
+        Authorization: `Bearer ${idToken}`,
+      };
+    }
 
-  // ✅ Axios v1-safe header set
-  if (config.headers instanceof AxiosHeaders) {
-    config.headers.set('Authorization', `Bearer ${idToken}`);
-  } else {
-    (config.headers as any) = {
-      ...(config.headers as any),
-      Authorization: `Bearer ${idToken}`,
-    };
-  }
-
-  return config;
-},
-(error) => Promise.reject(error)
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 export default api;
 
-// ----------------------------
-// User endpoints
-// ----------------------------
 export type UpdateMePayload = {
   displayName?: string;
   photoURL?: string;

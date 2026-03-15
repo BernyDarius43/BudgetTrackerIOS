@@ -10,7 +10,14 @@ import {
   useRef,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth, { FirebaseAuthTypes, signInWithEmailAndPassword } from '@react-native-firebase/auth';
+import auth, {
+  FirebaseAuthTypes,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  getIdToken,
+  getAuth,
+} from '@react-native-firebase/auth';
 import { signUpUser, signOutUser } from '@/services/firebase/firebaseAuth';
 import { router } from 'expo-router';
 import api from '@/services/api';
@@ -22,11 +29,11 @@ export type AuthContextType = {
   setCurrentUser: (user: FirebaseAuthTypes.User | null) => void;
   authMongoUser: any;
   setAuthMongoUser: (user: any) => Promise<void>;
-  updateUserProfile: (data: { 
-    uid: string; 
-    displayName: string; 
-    email: string; 
-    photoURL?: string; 
+  updateUserProfile: (data: {
+    uid: string;
+    displayName: string;
+    email: string;
+    photoURL?: string;
     phoneNumber?: string;
   }) => Promise<void>;
   loading: boolean;
@@ -54,9 +61,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const isRegisteringRef = useRef(false);
 
-  // ✅ Listen to Firebase auth state changes (no initialization issues!)
+  // ✅ Modular API — no more namespaced auth().onAuthStateChanged()
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
@@ -122,11 +129,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth(), email, password);
+      const userCredential = await signInWithEmailAndPassword(getAuth(), email, password);
       const firebaseUser = userCredential.user;
       console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
 
-      await firebaseUser.getIdToken(true);
+      // ✅ Modular API — no more firebaseUser.getIdToken()
+      await getIdToken(firebaseUser, true);
 
       const res = await api.post('/auth/login');
 
@@ -164,12 +172,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signUpUser(trimmedEmail, password);
 
-      const user = auth().currentUser;
+      // ✅ Modular API — no more auth().currentUser
+      const user = getAuth().currentUser;
       if (!user) {
         throw new Error('Firebase user is not available after sign up.');
       }
 
-      await user.getIdToken(true);
+      // ✅ Modular API — no more user.getIdToken()
+      await getIdToken(user, true);
 
       const res = await api.post('/auth/register');
 
@@ -192,34 +202,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logoutUser = async () => {
-  setLoading(true);
-  try {
-    // Step 1 — hit backend logout endpoint while token is still valid
+    setLoading(true);
     try {
-      await api.post('/auth/logout');
-      console.log('[Logout] Backend logout successful');
-    } catch (error) {
-      // Non-critical — backend session expiry is acceptable
-      console.warn('[Logout] Backend logout failed (non-critical):', error);
+      // Step 1 — backend logout while token is still valid
+      try {
+        await api.post('/auth/logout');
+        console.log('[Logout] Backend logout successful');
+      } catch (error) {
+        console.warn('[Logout] Backend logout failed (non-critical):', error);
+      }
+
+      // Step 2 — ✅ Modular API — no more auth().currentUser / auth().signOut()
+      if (getAuth().currentUser) {
+        await signOut(getAuth());
+        console.log('[Logout] Firebase logout successful');
+      }
+
+      // Step 3 — clear Mongo user from state + AsyncStorage
+      await setAuthMongoUser(null);
+      console.log('[Logout] Logout complete');
+
+    } catch (error: any) {
+      console.error('[Logout] Error:', error);
+      setErrorMessage('Error while logging out. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    // Step 2 — sign out of Firebase (single call, guarded)
-    if (auth().currentUser) {
-      await auth().signOut();
-      console.log('[Logout] Firebase logout successful');
-    }
-
-    // Step 3 — clear Mongo user from state + AsyncStorage
-    await setAuthMongoUser(null);
-    console.log('[Logout] Logout complete');
-
-  } catch (error: any) {
-    console.error('[Logout] Error:', error);
-    setErrorMessage('Error while logging out. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const updateUserProfile = useCallback(
     async ({
@@ -235,22 +244,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       photoURL?: string;
       phoneNumber?: string;
     }) => {
-      const user = auth().currentUser;
+      // ✅ Modular API — no more auth().currentUser
+      const user = getAuth().currentUser;
       if (!user) return;
 
-      // Update Firebase
       if (displayName || photoURL) {
-        await user.updateProfile({
-          displayName,
-          photoURL,
-        });
+        await user.updateProfile({ displayName, photoURL });
       }
 
       if (email && user.email !== email) {
         await user.updateEmail(email);
       }
 
-      // Sync Mongo
       const res = await api.patch('/user/me', {
         displayName,
         photoURL,

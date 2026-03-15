@@ -1,6 +1,6 @@
 // services/api.ts
 import axios, { AxiosHeaders } from 'axios';
-import auth from '@react-native-firebase/auth';
+import auth, { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
 
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL 
@@ -19,12 +19,14 @@ api.interceptors.request.use(
 
     if (existingAuth) return config;
 
-    const user = auth().currentUser;
+    // ✅ Modular API — no more auth().currentUser
+    const user = getAuth().currentUser;
     if (!user) {
       throw new Error('Not authenticated: Firebase user is missing.');
     }
 
-    const idToken = await user.getIdToken();
+    // ✅ Modular API — no more user.getIdToken()
+    const idToken = await getIdToken(user);
 
     if (config.headers instanceof AxiosHeaders) {
       config.headers.set('Authorization', `Bearer ${idToken}`);

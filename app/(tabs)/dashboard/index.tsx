@@ -1,10 +1,10 @@
 // app/(tabs)/dashboard/index.tsx
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { useFocusEffect } from "@react-navigation/native";
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { formatBalance } from '@/utils/formatters';
 import { formatDate } from '@/utils/formatters';
 import { MiniLineChart } from '@/components/common/MiniLineChart';
@@ -12,12 +12,15 @@ import { TransactionRow } from '@/components/common/TransactionRow';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useIncomeContext } from '@/context/IncomeContext';
 import { useExpenseContext } from '@/context/ExpenseContext';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { getAllIncomes } = useIncomeContext();
   const { getExpenses } = useExpenseContext();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   
   const { totalBalance, recentTransactions, chartValues, changeFromLastMonth, isEmpty } = useDashboardData();
 
@@ -83,7 +86,7 @@ Subsequent visits refresh normally */
               <TransactionRow 
                 key={tx._id} 
                 item={tx}
-                timeLabel={formatDate(tx.createdAt)}
+                timeLabel={formatDate(tx.date)}
               />
             ))
           ) : (
@@ -99,13 +102,13 @@ Subsequent visits refresh normally */
         {/* Quick Actions */}
         <View style={styles.actionsRow}>
           <Pressable 
-            style={[styles.actionBtn, { backgroundColor: COLORS.green }]}
+            style={[styles.actionBtn, { backgroundColor: colors.green }]}
             onPress={() => router.push('/(tabs)/income')}
           >
             <Text style={styles.actionText}>+ Income</Text>
           </Pressable>
           <Pressable 
-            style={[styles.actionBtn, { backgroundColor: COLORS.red }]}
+            style={[styles.actionBtn, { backgroundColor: colors.red }]}
             onPress={() => router.push('/(tabs)/expense')}
           >
             <Text style={styles.actionText}>- Expense</Text>
@@ -120,38 +123,38 @@ Subsequent visits refresh normally */
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   container: { padding: 18, gap: 16 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  muted: { color: COLORS.muted, fontSize: 13 },
-  balance: { color: COLORS.text, fontSize: 28, fontWeight: '800' },
-  balanceNegative: { color: COLORS.red, fontSize: 28, fontWeight: '800' },
+  muted: { color: colors.muted, fontSize: 13 },
+  balance: { color: colors.text, fontSize: 28, fontWeight: '800' },
+  balanceNegative: { color: colors.red, fontSize: 28, fontWeight: '800' },
   pill: {
-    backgroundColor: COLORS.pillBg,
-    borderColor: COLORS.pillBorder,
+    backgroundColor: colors.pillBg,
+    borderColor: colors.pillBorder,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
   },
-  pillText: { color: COLORS.green, fontWeight: '700', fontSize: 12 },
+  pillText: { color: colors.green, fontWeight: '700', fontSize: 12 },
   sectionHeader: {
     marginTop: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  sectionTitle: { color: COLORS.text, fontSize: 16, fontWeight: '800' },
-  link: { color: COLORS.green, fontWeight: '700' },
+  sectionTitle: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  link: { color: colors.green, fontWeight: '700' },
   txPanel: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     paddingVertical: 6,
   },
@@ -160,13 +163,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 8,
   },
   emptySubtext: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 13,
     textAlign: 'center',
   },
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionText: {
-    color: COLORS.bg,
+    color: colors.bg,
     fontSize: 16,
     fontWeight: '800',
   },

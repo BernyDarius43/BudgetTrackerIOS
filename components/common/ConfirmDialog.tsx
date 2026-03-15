@@ -1,7 +1,8 @@
 // components/common/ConfirmDialog.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal } from 'react-native';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ConfirmDialogProps = {
   visible: boolean;
@@ -24,6 +25,9 @@ export function ConfirmDialog({
   onCancel,
   dangerous = false,
 }: ConfirmDialogProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <Pressable style={styles.overlay} onPress={onCancel}>
@@ -40,7 +44,7 @@ export function ConfirmDialog({
               onPress={onConfirm}
               style={[
                 styles.confirmBtn,
-                { backgroundColor: dangerous ? COLORS.red : COLORS.green },
+                { backgroundColor: dangerous ? colors.red : colors.green },
               ]}
             >
               <Text style={styles.confirmBtnText}>{confirmText}</Text>
@@ -52,7 +56,7 @@ export function ConfirmDialog({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -61,22 +65,22 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   dialog: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     padding: 24,
     width: '100%',
     maxWidth: 400,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 20,
     fontWeight: '800',
     marginBottom: 12,
   },
   message: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 24,
@@ -90,12 +94,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
   },
   cancelBtnText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },
@@ -106,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmBtnText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 16,
     fontWeight: '800',
   },

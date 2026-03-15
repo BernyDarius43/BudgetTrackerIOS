@@ -1,5 +1,5 @@
 // components/common/FilterSheet.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 export type FilterState = {
   dateFrom: string;   // YYYY-MM-DD or ''
@@ -47,6 +48,8 @@ export function FilterSheet({
   onApply,
   onClose,
 }: FilterSheetProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [local, setLocal] = useState<FilterState>(current);
   const [categoryOpen, setCategoryOpen] = useState(false);
 
@@ -85,7 +88,7 @@ export function FilterSheet({
                 <Text style={styles.resetText}>Reset</Text>
               </Pressable>
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={22} color={COLORS.muted} />
+                <Ionicons name="close" size={22} color={colors.muted} />
               </Pressable>
             </View>
           </View>
@@ -99,7 +102,7 @@ export function FilterSheet({
                 <TextInput
                   style={styles.input}
                   placeholder="YYYY-MM-DD"
-                  placeholderTextColor={COLORS.muted}
+                  placeholderTextColor={colors.muted}
                   value={local.dateFrom}
                   onChangeText={(v) => set('dateFrom', v)}
                   keyboardType="numeric"
@@ -110,7 +113,7 @@ export function FilterSheet({
                 <TextInput
                   style={styles.input}
                   placeholder="YYYY-MM-DD"
-                  placeholderTextColor={COLORS.muted}
+                  placeholderTextColor={colors.muted}
                   value={local.dateTo}
                   onChangeText={(v) => set('dateTo', v)}
                   keyboardType="numeric"
@@ -126,7 +129,7 @@ export function FilterSheet({
                 <TextInput
                   style={styles.input}
                   placeholder="0"
-                  placeholderTextColor={COLORS.muted}
+                  placeholderTextColor={colors.muted}
                   value={local.amountMin}
                   onChangeText={(v) => set('amountMin', v)}
                   keyboardType="decimal-pad"
@@ -137,7 +140,7 @@ export function FilterSheet({
                 <TextInput
                   style={styles.input}
                   placeholder="Any"
-                  placeholderTextColor={COLORS.muted}
+                  placeholderTextColor={colors.muted}
                   value={local.amountMax}
                   onChangeText={(v) => set('amountMax', v)}
                   keyboardType="decimal-pad"
@@ -157,7 +160,7 @@ export function FilterSheet({
               <Ionicons
                 name={categoryOpen ? 'chevron-up' : 'chevron-down'}
                 size={16}
-                color={COLORS.muted}
+                color={colors.muted}
               />
             </Pressable>
 
@@ -172,7 +175,7 @@ export function FilterSheet({
                     All categories
                   </Text>
                   {!local.category && (
-                    <Ionicons name="checkmark" size={16} color={COLORS.green} />
+                    <Ionicons name="checkmark" size={16} color={colors.green} />
                   )}
                 </Pressable>
 
@@ -191,7 +194,7 @@ export function FilterSheet({
                       {cat}
                     </Text>
                     {local.category === cat && (
-                      <Ionicons name="checkmark" size={16} color={COLORS.green} />
+                      <Ionicons name="checkmark" size={16} color={colors.green} />
                     )}
                   </Pressable>
                 ))}
@@ -211,14 +214,14 @@ export function FilterSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: COLORS.line,
+    backgroundColor: colors.line,
     alignSelf: 'center',
     marginBottom: 16,
   },
@@ -241,7 +244,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 24,
     fontWeight: '900',
   },
@@ -251,12 +254,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   resetText: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
     fontWeight: '700',
   },
   sectionLabel: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.6,
@@ -273,23 +276,23 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   inputLabel: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
   },
   input: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
   },
   categoryPicker: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -298,18 +301,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   categorySelected: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '600',
   },
   categoryPlaceholder: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
   },
   categoryList: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 10,
     marginTop: 4,
     overflow: 'hidden',
@@ -321,25 +324,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    borderBottomColor: colors.line,
   },
   categoryOptionText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
   },
   categoryOptionActive: {
-    color: COLORS.green,
+    color: colors.green,
     fontWeight: '700',
   },
   applyBtn: {
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 8,
   },
   applyText: {
-    color: COLORS.bg,
+    color: colors.bg,
     fontSize: 16,
     fontWeight: '800',
   },

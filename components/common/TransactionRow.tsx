@@ -1,12 +1,13 @@
 // components/common/TransactionRow.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { formatMoney } from '@/utils/formatters';
 import { getCategoryIcon } from '@/constants/categoryIcons';
 import { TransactionBase } from '@/types/dashboard.types';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type TransactionRowProps = {
   item: TransactionBase;
@@ -15,8 +16,10 @@ type TransactionRowProps = {
 
 export function TransactionRow({ item, timeLabel }: TransactionRowProps) {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isExpense = item.amount < 0 || item.type === 'Expense';
-  const amountColor = isExpense ? COLORS.red : COLORS.green;
+  const amountColor = isExpense ? colors.red : colors.green;
   const amountPrefix = isExpense ? '-' : '+';
   const icon = getCategoryIcon(item.category);
 
@@ -51,7 +54,7 @@ export function TransactionRow({ item, timeLabel }: TransactionRowProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -59,7 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 14,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    borderBottomColor: colors.line,
   },
   iconSquare: {
     width: 44,
@@ -73,12 +76,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
   subtitle: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
   },
   amount: {

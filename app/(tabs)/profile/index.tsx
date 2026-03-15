@@ -1,14 +1,33 @@
 // app/(tabs)/profile/index.tsx
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, Modal } from 'react-native';
 import { useAuth } from '@/context/authContext/authContext';
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useThemeColors } from '@/hooks/useThemeColors';
 export default function ProfileScreen() {
-  const { currentUser, authMongoUser, logoutUser, loading } = useAuth();
+  const {
+    currentUser,
+    authMongoUser,
+    logoutUser,
+    loading,
+    themePreference,
+    resolvedTheme,
+    setThemePreference,
+  } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const [themeSheetOpen, setThemeSheetOpen] = useState(false);
+
+  const themeLabel = useMemo(() => {
+    if (themePreference === 'system') {
+      return `System (${resolvedTheme[0].toUpperCase()}${resolvedTheme.slice(1)})`;
+    }
+    return themePreference[0].toUpperCase() + themePreference.slice(1);
+  }, [themePreference, resolvedTheme]);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -115,7 +134,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Preferences */}
-        {authMongoUser?.preferences && (
+        {authMongoUser && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Preferences</Text>
             
@@ -123,18 +142,18 @@ export default function ProfileScreen() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Currency</Text>
                 <Text style={styles.infoValue}>
-                  {authMongoUser.preferences.currency || 'CAD'}
+                  {authMongoUser.preferences?.currency || 'CAD'}
                 </Text>
               </View>
 
               <View style={styles.divider} />
 
-              <View style={styles.infoRow}>
+              <Pressable style={styles.infoRow} onPress={() => setThemeSheetOpen(true)}>
                 <Text style={styles.infoLabel}>Theme</Text>
                 <Text style={styles.infoValue}>
-                  {authMongoUser.preferences.theme || 'Dark'}
+                  {themeLabel}
                 </Text>
-              </View>
+              </Pressable>
             </View>
           </View>
         )}
@@ -159,6 +178,49 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
+        {/* Theme Sheet */}
+        <Modal
+          visible={themeSheetOpen}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setThemeSheetOpen(false)}
+        >
+          <Pressable style={styles.sheetOverlay} onPress={() => setThemeSheetOpen(false)}>
+            <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+              <View style={styles.sheetHandle} />
+              <Text style={styles.sheetTitle}>Theme</Text>
+
+              {(['system', 'light', 'dark'] as const).map((option) => {
+                const label =
+                  option === 'system'
+                    ? `System (${resolvedTheme[0].toUpperCase()}${resolvedTheme.slice(1)})`
+                    : option[0].toUpperCase() + option.slice(1);
+                const isSelected = themePreference === option;
+
+                return (
+                  <Pressable
+                    key={option}
+                    style={styles.sheetOption}
+                    onPress={async () => {
+                      await setThemePreference(option);
+                      setThemeSheetOpen(false);
+                    }}
+                  >
+                    <Text style={[styles.sheetOptionText, isSelected && styles.sheetOptionTextActive]}>
+                      {label}
+                    </Text>
+                    {isSelected && <Text style={styles.sheetCheck}>✓</Text>}
+                  </Pressable>
+                );
+              })}
+
+              <Pressable style={styles.sheetCancel} onPress={() => setThemeSheetOpen(false)}>
+                <Text style={styles.sheetCancelText}>Cancel</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
         {/* App Info */}
         <View style={styles.appInfo}>
           <Text style={styles.appInfoText}>BudgetTracker v1.0.0</Text>
@@ -173,10 +235,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: colors.bg,
   },
   container: {
     padding: 18,
@@ -186,14 +248,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 28,
     fontWeight: '800',
   },
   profileCard: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 24,
     alignItems: 'center',
@@ -202,37 +264,37 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   avatarText: {
-    color: COLORS.bg,
+    color: colors.bg,
     fontSize: 32,
     fontWeight: '800',
   },
   displayName: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 24,
     fontWeight: '800',
     marginBottom: 4,
   },
   email: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
     marginBottom: 12,
   },
   roleBadge: {
-    backgroundColor: COLORS.pillBg,
-    borderColor: COLORS.pillBorder,
+    backgroundColor: colors.pillBg,
+    borderColor: colors.pillBorder,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
   roleText: {
-    color: COLORS.green,
+    color: colors.green,
     fontSize: 12,
     fontWeight: '700',
     textTransform: 'capitalize',
@@ -241,15 +303,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sectionTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
     marginBottom: 12,
   },
   infoPanel: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 16,
   },
@@ -260,11 +322,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   infoLabel: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
   },
   infoValue: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
     maxWidth: '60%',
@@ -272,29 +334,29 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.line,
+    backgroundColor: colors.line,
     marginVertical: 4,
   },
   actionButton: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     padding: 16,
     borderRadius: 14,
     alignItems: 'center',
     marginBottom: 12,
   },
   actionButtonText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },
   dangerButton: {
-    backgroundColor: COLORS.red,
-    borderColor: COLORS.red,
+    backgroundColor: colors.red,
+    borderColor: colors.red,
   },
   dangerButtonText: {
-    color: COLORS.white,
+    color: colors.white,
   },
   appInfo: {
     alignItems: 'center',
@@ -302,7 +364,72 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   appInfoText: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
+  },
+  sheetOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: colors.panel,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    paddingTop: 12,
+    gap: 4,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.line,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  sheetTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  sheetOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+  },
+  sheetOptionText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  sheetOptionTextActive: {
+    color: colors.green,
+    fontWeight: '800',
+  },
+  sheetCheck: {
+    color: colors.green,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  sheetCancel: {
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    backgroundColor: colors.panel2,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  sheetCancelText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

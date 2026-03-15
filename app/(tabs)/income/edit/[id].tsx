@@ -4,12 +4,15 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useIncomeContext } from "@/context/IncomeContext";
 import { EditTransactionScreen } from "@/components/transactions/EditTransactionScreen";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export default function EditIncomeRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { incomes } = useIncomeContext();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const income = useMemo(() => {
     return incomes.find((inc) => inc._id === id);
@@ -18,7 +21,7 @@ export default function EditIncomeRoute() {
   if (!income) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={COLORS.green} />
+        <ActivityIndicator size="large" color={colors.green} />
       </View>
     );
   }
@@ -32,11 +35,12 @@ export default function EditIncomeRoute() {
   );
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: COLORS.bg,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    loading: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.bg,
+    },
+  });

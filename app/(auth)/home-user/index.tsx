@@ -1,13 +1,14 @@
 // app/(tabs)/home-user/index.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/authContext/authContext';
 
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { useIncomeContext } from "@/context/IncomeContext";
 import { useExpenseContext } from "@/context/ExpenseContext";
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 export default function HomePageUserScreen() {
   const { currentUser, userLoggedIn, authMongoUser } = useAuth();
@@ -15,6 +16,8 @@ export default function HomePageUserScreen() {
   const { getAllIncomes } = useIncomeContext();
   const { getExpenses } = useExpenseContext();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
 useEffect(() => {
     if (!userLoggedIn || !currentUser) return;
@@ -52,7 +55,7 @@ useEffect(() => {
 
             <View style={styles.quickActions}>
               <Pressable 
-                style={[styles.actionCard, { borderColor: COLORS.green }]}
+                style={[styles.actionCard, { borderColor: colors.green }]}
                 onPress={() => router.push('/(tabs)/income')}
               >
                 <Text style={styles.actionTitle}>Income</Text>
@@ -60,7 +63,7 @@ useEffect(() => {
               </Pressable>
 
               <Pressable 
-                style={[styles.actionCard, { borderColor: COLORS.red }]}
+                style={[styles.actionCard, { borderColor: colors.red }]}
                 onPress={() => router.push('/(tabs)/expense')}
               >
                 <Text style={styles.actionTitle}>Expenses</Text>
@@ -84,10 +87,10 @@ useEffect(() => {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.bg,
+    backgroundColor: colors.bg,
   },
   container: {
     flex: 1,
@@ -95,37 +98,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   welcomeCard: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 24,
     marginBottom: 24,
   },
   greeting: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 16,
     marginBottom: 8,
   },
   userName: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 32,
     fontWeight: '800',
     marginBottom: 12,
   },
   subText: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 15,
   },
   dashboardBtn: {
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     padding: 18,
     borderRadius: 14,
     alignItems: 'center',
     marginBottom: 24,
   },
   btnText: {
-    color: COLORS.bg,
+    color: colors.bg,
     fontSize: 16,
     fontWeight: '800',
   },
@@ -135,31 +138,31 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     flex: 1,
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1.5,
     borderRadius: 14,
     padding: 20,
   },
   actionTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '800',
     marginBottom: 6,
   },
   actionSubtitle: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 13,
   },
   notLoggedIn: {
     alignItems: 'center',
   },
   notLoggedText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 18,
     marginBottom: 24,
   },
   loginBtn: {
-    backgroundColor: COLORS.blue,
+    backgroundColor: colors.blue,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 14,

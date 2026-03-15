@@ -1,6 +1,4 @@
 // constants/categoryIcons.ts
-import { COLORS } from '@/constants/Colors';
-
 export type CategoryIconConfig = {
   name: string; // Ionicons icon name
   color: string;
@@ -8,7 +6,7 @@ export type CategoryIconConfig = {
 
 export const CATEGORY_ICONS: Record<string, CategoryIconConfig> = {
   // ── Income categories ──────────────────────────────────────
-  Salary:           { name: 'briefcase-outline',                   color: COLORS.green },
+  Salary:           { name: 'briefcase-outline',                   color: '#B9FF4D' },
   Freelance:        { name: 'laptop-outline',                      color: '#4FC3F7' },
   Business:         { name: 'business-outline',                    color: '#FFD54F' },
   Investment:       { name: 'trending-up-outline',                 color: '#81C784' },
@@ -44,7 +42,7 @@ export function getCategoryIcon(category: string): CategoryIconConfig {
   return (
     CATEGORY_ICONS[category] ?? {
       name: 'help-circle-outline',
-      color: COLORS.muted,
+      color: '#A9B3C6',
     }
   );
 }

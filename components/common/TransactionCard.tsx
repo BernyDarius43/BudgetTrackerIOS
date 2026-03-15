@@ -1,12 +1,13 @@
 // components/common/TransactionCard.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { formatMoney } from '@/utils/formatters';
 import { getCategoryIcon } from '@/constants/categoryIcons';
 import { TransactionBase } from '@/types/dashboard.types';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type TransactionCardProps = {
   item: TransactionBase;
@@ -15,8 +16,10 @@ type TransactionCardProps = {
 
 export function TransactionCard({ item, timeLabel }: TransactionCardProps) {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isExpense = item.amount < 0 || item.type === 'Expense';
-  const accentColor = isExpense ? COLORS.red : COLORS.green;
+  const accentColor = isExpense ? colors.red : colors.green;
   const amountPrefix = isExpense ? '-' : '+';
   const icon = getCategoryIcon(item.category);
 
@@ -73,11 +76,11 @@ export function TransactionCard({ item, timeLabel }: TransactionCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 14,
     borderLeftWidth: 4,
     padding: 14,
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 15,
     fontWeight: '800',
   },
@@ -129,11 +132,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   date: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
   },
   description: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 12,
     maxWidth: '60%',
     textAlign: 'right',

@@ -1,10 +1,15 @@
 // services/api.ts
 import axios, { AxiosHeaders } from 'axios';
-import auth, { getAuth, getIdToken } from '@react-native-firebase/auth';
+import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
 
-const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL 
-  || 'http://192.168.2.23:5000/api/v1';
+const rawBaseUrl =
+  Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL ||
+  'https://budgettrackerapi-muxo.onrender.com'; // Fallback URL if env variable is missing
+const normalizedBaseUrl = rawBaseUrl.replace(/\/$/, '');
+const baseURL = normalizedBaseUrl.endsWith('/api/v1')
+  ? normalizedBaseUrl
+  : `${normalizedBaseUrl}/api/v1`;
 
 const api = axios.create({
   baseURL,
@@ -48,6 +53,10 @@ export type UpdateMePayload = {
   displayName?: string;
   photoURL?: string;
   phoneNumber?: string;
+  preferences?: {
+    theme?: 'light' | 'dark' | 'system';
+    currency?: string;
+  };
 };
 
 export async function getMe() {

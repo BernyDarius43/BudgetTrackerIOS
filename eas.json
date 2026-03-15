@@ -8,7 +8,7 @@
     "base": {
       "node": "22.14.0",
       "env": {
-        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+        "API_URL": "https://budget-tracker-api-git-main-motiondbs-projects.vercel.app/api/v1"
       },
       "ios": {
         "image": "latest",
@@ -23,7 +23,7 @@
       "distribution": "internal",
       "extends": "base",
       "env": {
-        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+        "API_URL": "https://budget-tracker-api-git-main-motiondbs-projects.vercel.app/api/v1"
       }
     },
     "preview": {
@@ -40,7 +40,7 @@
       "extends": "base",
       "node": "22.14.0",
       "env": {
-        "API_URL": "https://budgettrackerapi-production.up.railway.app/api/v1"
+        "API_URL": "https://budget-tracker-api-git-main-motiondbs-projects.vercel.app/api/v1"
       }
     },
     "ios": {

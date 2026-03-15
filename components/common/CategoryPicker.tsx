@@ -1,7 +1,8 @@
 // components/common/CategoryPicker.tsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, ScrollView } from 'react-native';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type CategoryPickerProps = {
   mode: 'Income' | 'Expense';
@@ -35,6 +36,8 @@ const EXPENSE_CATEGORIES = [
 
 export function CategoryPicker({ mode, value, onChange, error }: CategoryPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   
   const categories = mode === 'Income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
@@ -94,11 +97,11 @@ export function CategoryPicker({ mode, value, onChange, error }: CategoryPickerP
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   picker: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -107,18 +110,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pickerError: {
-    borderColor: COLORS.red,
+    borderColor: colors.red,
   },
   pickerText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
   },
   pickerPlaceholder: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
   },
   arrow: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 10,
   },
   modalOverlay: {
@@ -129,16 +132,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     width: '100%',
     maxHeight: '80%',
     padding: 20,
   },
   modalTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '800',
     marginBottom: 16,
@@ -156,32 +159,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionSelected: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
   },
   optionText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 15,
   },
   optionTextSelected: {
     fontWeight: '700',
-    color: COLORS.green,
+    color: colors.green,
   },
   checkmark: {
-    color: COLORS.green,
+    color: colors.green,
     fontSize: 18,
     fontWeight: '800',
   },
   closeButton: {
     marginTop: 16,
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
   },
   closeButtonText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },

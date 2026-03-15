@@ -1,5 +1,5 @@
 // components/common/SortSheet.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 export type SortOption =
   | 'date_desc'
@@ -31,6 +32,9 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
 ];
 
 export function SortSheet({ visible, selected, onSelect, onClose }: SortSheetProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -56,7 +60,7 @@ export function SortSheet({ visible, selected, onSelect, onClose }: SortSheetPro
                 {option.label}
               </Text>
               {selected === option.key && (
-                <Ionicons name="checkmark" size={18} color={COLORS.green} />
+                <Ionicons name="checkmark" size={18} color={colors.green} />
               )}
             </Pressable>
           ))}
@@ -71,14 +75,14 @@ export function SortSheet({ visible, selected, onSelect, onClose }: SortSheetPro
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 16,
@@ -90,7 +94,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: COLORS.line,
+    backgroundColor: colors.line,
     alignSelf: 'center',
     marginBottom: 16,
   },
@@ -101,15 +105,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    borderBottomColor: colors.line,
   },
   optionText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '600',
   },
   optionTextActive: {
-    color: COLORS.green,
+    color: colors.green,
     fontWeight: '800',
   },
   cancelBtn: {
@@ -117,12 +121,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
   },
   cancelText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },

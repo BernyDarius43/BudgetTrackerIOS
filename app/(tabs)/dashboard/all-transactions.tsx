@@ -9,7 +9,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { formatMoney } from '@/utils/formatters';
 import { useAllTransactions, MergedTransaction } from '@/hooks/useAllTransactions';
 import { groupTransactions, TimeRange, TransactionSection } from '@/utils/groupTransactions';
@@ -17,6 +17,7 @@ import { getCategoryIcon } from '@/constants/categoryIcons';
 import { SortSheet } from '@/components/common/SortSheet';
 import { FilterSheet, hasActiveFilters, EMPTY_FILTER } from '@/components/common/FilterSheet';
 import { useTransactionControls } from '@/hooks/useTransactionControls';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type ViewMode = 'list' | 'card';
 
@@ -37,16 +38,27 @@ const ALL_CATEGORIES = [
 // ─── KOHO List Row ─────────────────────────────────────────────────────────────
 
 function ListRow({ item }: { item: MergedTransaction }) {
+  const router = useRouter();
+  const colors = useThemeColors();
+  const listRowStyles = useMemo(() => createListRowStyles(colors), [colors]);
   const icon = getCategoryIcon(item.category);
   const isIncome = item.type === 'Income';
-  const amountColor = isIncome ? COLORS.green : COLORS.red;
+  const amountColor = isIncome ? colors.green : colors.red;
   const amountPrefix = isIncome ? '+' : '-';
   const timeStr = new Date(item.date).toLocaleTimeString('default', {
     hour: '2-digit', minute: '2-digit',
   });
 
+  const handlePress = () => {
+    if (item.type === 'Income') {
+      router.push(`/(tabs)/income/${item._id}`);
+    } else {
+      router.push(`/(tabs)/expense/${item._id}`);
+    }
+  };
+
   return (
-    <View style={listRowStyles.row}>
+    <Pressable onPress={handlePress} style={listRowStyles.row}>
       <View style={[listRowStyles.iconSquare, { backgroundColor: icon.color }]}>
         <Ionicons name={icon.name as any} size={20} color="#fff" />
       </View>
@@ -57,36 +69,47 @@ function ListRow({ item }: { item: MergedTransaction }) {
       <Text style={[listRowStyles.amount, { color: amountColor }]}>
         {amountPrefix}{formatMoney(Math.abs(item.amount))} $
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
-const listRowStyles = StyleSheet.create({
+const createListRowStyles = (colors: ThemeColors) => StyleSheet.create({
   row: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 12,
-    gap: 14, borderBottomWidth: 1, borderBottomColor: COLORS.line,
+    gap: 14, borderBottomWidth: 1, borderBottomColor: colors.line,
   },
   iconSquare: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   textBlock: { flex: 1, gap: 3 },
-  title: { color: COLORS.text, fontSize: 15, fontWeight: '700' },
-  subtitle: { color: COLORS.muted, fontSize: 12 },
+  title: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  subtitle: { color: colors.muted, fontSize: 12 },
   amount: { fontSize: 15, fontWeight: '800' },
 });
 
 // ─── Card Tile ─────────────────────────────────────────────────────────────────
 
 function CardTile({ item }: { item: MergedTransaction }) {
+  const router = useRouter();
+  const colors = useThemeColors();
+  const cardStyles = useMemo(() => createCardStyles(colors), [colors]);
   const icon = getCategoryIcon(item.category);
   const isIncome = item.type === 'Income';
-  const accentColor = isIncome ? COLORS.green : COLORS.red;
+  const accentColor = isIncome ? colors.green : colors.red;
   const amountPrefix = isIncome ? '+' : '-';
   const dateStr = new Date(item.date).toLocaleDateString('default', {
     day: 'numeric', month: 'short', year: 'numeric',
   });
 
+  const handlePress = () => {
+    if (item.type === 'Income') {
+      router.push(`/(tabs)/income/${item._id}`);
+    } else {
+      router.push(`/(tabs)/expense/${item._id}`);
+    }
+  };
+
   return (
-    <View style={[cardStyles.card, { borderLeftColor: accentColor }]}>
+    <Pressable onPress={handlePress} style={[cardStyles.card, { borderLeftColor: accentColor }]}>
       <View style={cardStyles.topRow}>
         <View style={[cardStyles.iconSquare, { backgroundColor: icon.color }]}>
           <Ionicons name={icon.name as any} size={22} color="#fff" />
@@ -112,27 +135,27 @@ function CardTile({ item }: { item: MergedTransaction }) {
           <Text style={cardStyles.description} numberOfLines={1}>{item.description}</Text>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
-const cardStyles = StyleSheet.create({
+const createCardStyles = (colors: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line,
     borderRadius: 14, borderLeftWidth: 4, padding: 14,
     marginHorizontal: 16, marginVertical: 6, gap: 10,
   },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   iconSquare: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   titleBlock: { flex: 1, gap: 6 },
-  title: { color: COLORS.text, fontSize: 15, fontWeight: '800' },
+  title: { color: colors.text, fontSize: 15, fontWeight: '800' },
   metaRow: { flexDirection: 'row', gap: 6 },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
   badgeText: { fontSize: 11, fontWeight: '700' },
   amount: { fontSize: 14, fontWeight: '800' },
   bottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  date: { color: COLORS.muted, fontSize: 12 },
-  description: { color: COLORS.muted, fontSize: 12, maxWidth: '60%', textAlign: 'right' },
+  date: { color: colors.muted, fontSize: 12 },
+  description: { color: colors.muted, fontSize: 12, maxWidth: '60%', textAlign: 'right' },
 });
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
@@ -140,6 +163,8 @@ const cardStyles = StyleSheet.create({
 export default function AllTransactionsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { transactions } = useAllTransactions();
 
   const [selectedRange, setSelectedRange] = useState<TimeRange>('1M');
@@ -196,7 +221,7 @@ export default function AllTransactionsScreen() {
 
   const ListEmpty = (
     <View style={styles.emptyState}>
-      <Ionicons name="receipt-outline" size={48} color={COLORS.muted} />
+      <Ionicons name="receipt-outline" size={48} color={colors.muted} />
       <Text style={styles.emptyText}>
         {filtersActive ? 'No results match your filters' : 'No transactions found'}
       </Text>
@@ -215,7 +240,7 @@ export default function AllTransactionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={22} color={COLORS.green} />
+          <Ionicons name="chevron-back" size={22} color={colors.green} />
           <Text style={styles.backText}>Back</Text>
         </Pressable>
 
@@ -244,7 +269,7 @@ export default function AllTransactionsScreen() {
       <View style={styles.controls}>
           {/* Sort */}
           <Pressable style={styles.controlBtn} onPress={() => setSortSheetOpen(true)}>
-            <Ionicons name="swap-vertical-outline" size={18} color={COLORS.text} />
+            <Ionicons name="swap-vertical-outline" size={18} color={colors.text} />
           </Pressable>
 
           {/* Filter */}
@@ -252,7 +277,7 @@ export default function AllTransactionsScreen() {
             style={[styles.controlBtn, filtersActive && styles.controlBtnActive]}
             onPress={() => setFilterSheetOpen(true)}
           >
-            <Ionicons name="options-outline" size={18} color={filtersActive ? COLORS.green : COLORS.text} />
+            <Ionicons name="options-outline" size={18} color={filtersActive ? colors.green : colors.text} />
             {filtersActive && <View style={styles.filterDot} />}
           </Pressable>
 
@@ -262,13 +287,13 @@ export default function AllTransactionsScreen() {
               onPress={() => setViewMode('list')}
               style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
             >
-              <Ionicons name="list-outline" size={18} color={viewMode === 'list' ? COLORS.green : COLORS.muted} />
+              <Ionicons name="list-outline" size={18} color={viewMode === 'list' ? colors.green : colors.muted} />
             </Pressable>
             <Pressable
               onPress={() => setViewMode('card')}
               style={[styles.toggleBtn, viewMode === 'card' && styles.toggleBtnActive]}
             >
-              <Ionicons name="grid-outline" size={18} color={viewMode === 'card' ? COLORS.green : COLORS.muted} />
+              <Ionicons name="grid-outline" size={18} color={viewMode === 'card' ? colors.green : colors.muted} />
             </Pressable>
           </View>
         </View>
@@ -288,7 +313,7 @@ export default function AllTransactionsScreen() {
         ListEmptyComponent={ListEmpty}
         contentContainerStyle={[
           viewMode === 'list'
-            ? { marginHorizontal: 16, backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line, borderRadius: 18, overflow: 'hidden' }
+            ? { marginHorizontal: 16, backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line, borderRadius: 18, overflow: 'hidden' }
             : { paddingTop: 4 },
           { paddingBottom: insets.bottom + 24 },
         ]}
@@ -314,17 +339,17 @@ export default function AllTransactionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12,
   },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  backText: { color: COLORS.green, fontWeight: '700', fontSize: 15 },
+  backText: { color: colors.green, fontWeight: '700', fontSize: 15 },
   headerTitle: {
-  color: COLORS.text,
+  color: colors.text,
   fontSize: 18,
   fontWeight: '800',
   position: 'absolute',
@@ -336,52 +361,52 @@ const styles = StyleSheet.create({
   controls: {paddingHorizontal: 16, gap: 8, marginBottom: 4, flexDirection: 'row-reverse', alignItems: 'flex-end', borderRadius: 10 },
   controlBtn: {
     width: 34, height: 34, borderRadius: 10,
-    backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
-  controlBtnActive: { borderColor: COLORS.green },
+  controlBtnActive: { borderColor: colors.green },
   filterDot: {
     position: 'absolute', top: 5, right: 5,
     width: 7, height: 7, borderRadius: 4,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
   },
   viewToggle: {
-    flexDirection: 'row', backgroundColor: COLORS.panel,
-    borderWidth: 1, borderColor: COLORS.line,
+    flexDirection: 'row', backgroundColor: colors.panel,
+    borderWidth: 1, borderColor: colors.line,
     borderRadius: 10, overflow: 'hidden',
   },
   toggleBtn: { paddingHorizontal: 10, paddingVertical: 6 },
-  toggleBtnActive: { backgroundColor: COLORS.panel2 },
+  toggleBtnActive: { backgroundColor: colors.panel2 },
   rangeTabs: {
     flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 4,
   },
   rangeTab: {
     flex: 1, paddingVertical: 8, borderRadius: 10, alignItems: 'center',
-    backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line,
   },
-  rangeTabActive: { backgroundColor: COLORS.green, borderColor: COLORS.green },
-  rangeTabText: { color: COLORS.muted, fontWeight: '700', fontSize: 13 },
-  rangeTabTextActive: { color: COLORS.bg },
+  rangeTabActive: { backgroundColor: colors.green, borderColor: colors.green },
+  rangeTabText: { color: colors.muted, fontWeight: '700', fontSize: 13 },
+  rangeTabTextActive: { color: colors.bg },
   countRow: {
-    color: COLORS.muted, fontSize: 12,
+    color: colors.muted, fontSize: 12,
     paddingHorizontal: 20, paddingBottom: 8,
   },
   dateHeader: {
-    color: COLORS.muted, fontSize: 11, fontWeight: '700',
+    color: colors.muted, fontSize: 11, fontWeight: '700',
     letterSpacing: 0.8, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4,
   },
   cardSectionHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 20, paddingBottom: 8,
   },
-  cardSectionTitle: { color: COLORS.text, fontSize: 15, fontWeight: '800' },
-  sectionCount: { color: COLORS.muted, fontSize: 12 },
+  cardSectionTitle: { color: colors.text, fontSize: 15, fontWeight: '800' },
+  sectionCount: { color: colors.muted, fontSize: 12 },
   emptyState: {
     margin: 16, padding: 32, alignItems: 'center', gap: 12,
-    backgroundColor: COLORS.panel2, borderWidth: 1,
-    borderColor: COLORS.line, borderRadius: 18,
+    backgroundColor: colors.panel2, borderWidth: 1,
+    borderColor: colors.line, borderRadius: 18,
   },
-  emptyText: { color: COLORS.text, fontSize: 15, fontWeight: '700', textAlign: 'center' },
-  emptySubtext: { color: COLORS.muted, fontSize: 13 },
-  clearFilters: { color: COLORS.green, fontSize: 14, fontWeight: '700' },
+  emptyText: { color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' },
+  emptySubtext: { color: colors.muted, fontSize: 13 },
+  clearFilters: { color: colors.green, fontSize: 14, fontWeight: '700' },
 });

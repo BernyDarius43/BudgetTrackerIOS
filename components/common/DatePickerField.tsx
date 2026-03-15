@@ -1,8 +1,9 @@
 // components/common/DatePickerField.tsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type DatePickerFieldProps = {
   value: string; // ISO date string YYYY-MM-DD
@@ -12,6 +13,8 @@ type DatePickerFieldProps = {
 
 export function DatePickerField({ value, onChange, error }: DatePickerFieldProps) {
   const [show, setShow] = useState(false);
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const dateValue = value ? new Date(value) : new Date();
 
@@ -59,11 +62,11 @@ export function DatePickerField({ value, onChange, error }: DatePickerFieldProps
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   picker: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -72,14 +75,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pickerError: {
-    borderColor: COLORS.red,
+    borderColor: colors.red,
   },
   pickerText: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 14,
   },
   pickerPlaceholder: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
   },
   icon: {

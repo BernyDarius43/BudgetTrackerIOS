@@ -5,8 +5,6 @@ import { useAuth } from '@/context/authContext/authContext';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/Colors';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { auth } from '@/services/firebase/firebaseConfig';
-
 export default function ProfileScreen() {
   const { currentUser, authMongoUser, logoutUser, loading } = useAuth();
   const router = useRouter();

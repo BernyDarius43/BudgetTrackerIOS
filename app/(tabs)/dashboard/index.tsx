@@ -46,7 +46,7 @@ Subsequent visits refresh normally */
   <Text style={styles.muted}>Total balance</Text>
   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10 }}>
     <Text style={styles.balance}>
-      {formatBalance(totalBalance)} CAD
+      {formatBalance(totalBalance)}
     </Text>
     <View style={styles.pill}>
       <Text style={styles.pillText}>
@@ -72,7 +72,7 @@ Subsequent visits refresh normally */
         {/* Transactions */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Transactions</Text>
-          <Pressable onPress={() => router.push('/(tabs)/income')}>
+          <Pressable onPress={() => router.push('/(tabs)/dashboard/all-transactions' as any)}>
             <Text style={styles.link}>See all</Text>
           </Pressable>
         </View>

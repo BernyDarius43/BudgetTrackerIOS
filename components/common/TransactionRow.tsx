@@ -1,9 +1,11 @@
 // components/common/TransactionRow.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/constants/Colors';
 import { formatMoney } from '@/utils/formatters';
+import { getCategoryIcon } from '@/constants/categoryIcons';
 import { TransactionBase } from '@/types/dashboard.types';
 
 type TransactionRowProps = {
@@ -14,7 +16,9 @@ type TransactionRowProps = {
 export function TransactionRow({ item, timeLabel }: TransactionRowProps) {
   const router = useRouter();
   const isExpense = item.amount < 0 || item.type === 'Expense';
-  const amountColor = isExpense ? COLORS.text : COLORS.green;
+  const amountColor = isExpense ? COLORS.red : COLORS.green;
+  const amountPrefix = isExpense ? '-' : '+';
+  const icon = getCategoryIcon(item.category);
 
   const handlePress = () => {
     if (item.type === 'Income') {
@@ -25,51 +29,60 @@ export function TransactionRow({ item, timeLabel }: TransactionRowProps) {
   };
 
   return (
-    <Pressable onPress={handlePress} style={styles.txRow}>
-      <View style={styles.txIcon} />
-      <View style={{ flex: 1 }}>
-        <Text style={styles.txTitle}>{item.title}</Text>
-        <Text style={styles.txSub}>
-          {item.category} {timeLabel ? `• ${timeLabel}` : ''}
+    <Pressable onPress={handlePress} style={styles.row}>
+      {/* Square rounded icon — KOHO style */}
+      <View style={[styles.iconSquare, { backgroundColor: icon.color }]}>
+        <Ionicons name={icon.name as any} size={20} color="#fff" />
+      </View>
+
+      {/* Title + subtitle */}
+      <View style={styles.textBlock}>
+        <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.subtitle}>
+          {timeLabel ? `${timeLabel} · ` : ''}{item.category}
         </Text>
       </View>
-      <Text style={[styles.txAmount, { color: amountColor }]}>
-        {formatMoney(isExpense ? -Math.abs(item.amount) : item.amount)}
+
+      {/* Amount */}
+      <Text style={[styles.amount, { color: amountColor }]}>
+        {amountPrefix}{formatMoney(Math.abs(item.amount))} $
       </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  txRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.txBorder,
+    gap: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
   },
-  txIcon: {
-    width: 34,
-    height: 34,
+  iconSquare: {
+    width: 44,
+    height: 44,
     borderRadius: 12,
-    backgroundColor: COLORS.panel,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  txTitle: { 
-    color: COLORS.text, 
-    fontWeight: '800',
+  textBlock: {
+    flex: 1,
+    gap: 3,
+  },
+  title: {
+    color: COLORS.text,
     fontSize: 15,
+    fontWeight: '700',
   },
-  txSub: { 
-    color: COLORS.muted, 
-    fontSize: 12, 
-    marginTop: 2,
+  subtitle: {
+    color: COLORS.muted,
+    fontSize: 12,
   },
-  txAmount: { 
-    fontWeight: '900',
-    fontSize: 16,
+  amount: {
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

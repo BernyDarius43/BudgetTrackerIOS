@@ -10,7 +10,7 @@ import {
   useRef,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes, signInWithEmailAndPassword } from '@react-native-firebase/auth';
 import { signUpUser, signOutUser } from '@/services/firebase/firebaseAuth';
 import { router } from 'expo-router';
 import api from '@/services/api';
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const userCredential = await signInWithEmailAndPassword(auth(), email, password);
       const firebaseUser = userCredential.user;
       console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
 
@@ -192,29 +192,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logoutUser = async () => {
-    setLoading(true);
-    if (currentUser) {
-      try {
-        try {
-          await signOutUser();
-          console.log('[Logout] Backend logout successful');
-        } catch (error) {
-          console.warn('[Logout] Backend logout failed (non-critical):', error);
-        }
-
-        await auth().signOut();
-        console.log('[Logout] Firebase logout successful');
-
-        await setAuthMongoUser(null);
-        console.log('[Logout] Logout complete');
-      } catch (error: any) {
-        console.error('[Logout] Error:', error);
-        setErrorMessage('Error while logging out. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+  setLoading(true);
+  try {
+    // Step 1 — hit backend logout endpoint while token is still valid
+    try {
+      await api.post('/auth/logout');
+      console.log('[Logout] Backend logout successful');
+    } catch (error) {
+      // Non-critical — backend session expiry is acceptable
+      console.warn('[Logout] Backend logout failed (non-critical):', error);
     }
-  };
+
+    // Step 2 — sign out of Firebase (single call, guarded)
+    if (auth().currentUser) {
+      await auth().signOut();
+      console.log('[Logout] Firebase logout successful');
+    }
+
+    // Step 3 — clear Mongo user from state + AsyncStorage
+    await setAuthMongoUser(null);
+    console.log('[Logout] Logout complete');
+
+  } catch (error: any) {
+    console.error('[Logout] Error:', error);
+    setErrorMessage('Error while logging out. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const updateUserProfile = useCallback(
     async ({

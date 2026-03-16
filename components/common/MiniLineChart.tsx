@@ -2,7 +2,8 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type MiniLineChartProps = {
   values: number[];
@@ -10,6 +11,8 @@ type MiniLineChartProps = {
 
 export function MiniLineChart({ values }: MiniLineChartProps) {
   const [innerSize, setInnerSize] = useState({ w: 0, h: 0 });
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Always compute safely (no early return before hooks)
   const domain = useMemo(() => {
@@ -112,7 +115,7 @@ export function MiniLineChart({ values }: MiniLineChartProps) {
             <Svg width={innerSize.w} height={innerSize.h} style={StyleSheet.absoluteFill}>
               <Path
                 d={d}
-                stroke={COLORS.green2}
+                stroke={colors.green2}
                 strokeWidth={3}
                 fill="none"
                 strokeLinecap="round"
@@ -141,7 +144,7 @@ export function MiniLineChart({ values }: MiniLineChartProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { gap: 8 },
   header: {
     flexDirection: 'row',
@@ -149,13 +152,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
   },
-  label: { color: COLORS.text, fontSize: 14, fontWeight: '700' },
-  range: { color: COLORS.muted, fontSize: 11, fontWeight: '700' },
+  label: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  range: { color: colors.muted, fontSize: 11, fontWeight: '700' },
 
   chartWrap: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 14,
     paddingBottom: 32,
@@ -168,14 +171,14 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     height: 1.5,
-    backgroundColor: COLORS.red,
+    backgroundColor: colors.red,
     opacity: 0.5,
   },
   zeroLabel: {
     position: 'absolute',
     left: 0,
     top: -10,
-    color: COLORS.red,
+    color: colors.red,
     fontSize: 9,
     fontWeight: '700',
   },
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     height: 1,
-    backgroundColor: COLORS.line,
+    backgroundColor: colors.line,
     opacity: 0.3,
   },
 
@@ -198,9 +201,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginLeft: -4,
     marginTop: -4,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     borderWidth: 2,
-    borderColor: COLORS.panel2,
+    borderColor: colors.panel2,
   },
 
   xAxis: {
@@ -211,5 +214,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  xLabel: { color: COLORS.muted, fontSize: 10, fontWeight: '600' },
+  xLabel: { color: colors.muted, fontSize: 10, fontWeight: '600' },
 });

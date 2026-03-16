@@ -11,16 +11,19 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/authContext/authContext";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { PRESET_AVATARS } from "@/constants/avatars";
 import api from "@/services/api";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export default function EditProfileScreen() {
   const { currentUser, updateUserProfile, authMongoUser } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [displayName, setDisplayName] = useState(authMongoUser?.displayName ?? currentUser?.displayName ?? '');
   const [email, setEmail] = useState(authMongoUser?.email ?? currentUser?.email ?? '');
@@ -138,8 +141,8 @@ export default function EditProfileScreen() {
   
   if (!currentUser) {
     return (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={COLORS.green} />
+      <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={colors.green} />
         </View>
     );
   }
@@ -170,7 +173,7 @@ export default function EditProfileScreen() {
         <TextInput
           style={styles.input}
           placeholder="Your name"
-          placeholderTextColor={COLORS.muted}
+          placeholderTextColor={colors.muted}
           value={displayName}
           onChangeText={setDisplayName}
         />
@@ -180,7 +183,7 @@ export default function EditProfileScreen() {
           style={styles.input}
           placeholder="Your phone number"
           keyboardType="phone-pad"
-          placeholderTextColor={COLORS.muted}
+          placeholderTextColor={colors.muted}
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         />
@@ -189,7 +192,7 @@ export default function EditProfileScreen() {
         <TextInput
           style={styles.input}
           placeholder="you@example.com"
-          placeholderTextColor={COLORS.muted}
+          placeholderTextColor={colors.muted}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -202,7 +205,7 @@ export default function EditProfileScreen() {
           disabled={!canSave}
         >
           {saving ? (
-            <ActivityIndicator color={COLORS.bg} />
+            <ActivityIndicator color={colors.bg} />
           ) : (
             <Text style={styles.buttonText}>Save Changes</Text>
           )}
@@ -216,15 +219,15 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   container: { flex: 1, padding: 18, gap: 10 },
-  title: { color: COLORS.text, fontSize: 22, fontWeight: "900", marginBottom: 8 },
+  title: { color: colors.text, fontSize: 22, fontWeight: "900", marginBottom: 8 },
 
   sectionTitle: {
-    color: COLORS.muted,
+    color: colors.muted,
     marginTop: 4,
     marginBottom: 10,
     fontWeight: "700",
@@ -244,43 +247,43 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.10)",
   },
   avatarSelected: {
-    borderColor: COLORS.green,
+    borderColor: colors.green,
   },
   avatar: {
     width: "100%",
     height: "100%",
   },
 
-  label: { color: COLORS.muted, fontSize: 13, fontWeight: "700", marginTop: 8 },
+  label: { color: colors.muted, fontSize: 13, fontWeight: "700", marginTop: 8 },
   input: {
-    backgroundColor: COLORS.panel2,
-    borderColor: COLORS.line,
+    backgroundColor: colors.panel2,
+    borderColor: colors.line,
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 15,
   },
 
   button: {
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
     marginTop: 16,
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: COLORS.bg, fontSize: 16, fontWeight: "900" },
+  buttonText: { color: colors.bg, fontSize: 16, fontWeight: "900" },
 
   secondaryBtn: {
-    backgroundColor: COLORS.panel,
-    borderColor: COLORS.line,
+    backgroundColor: colors.panel,
+    borderColor: colors.line,
     borderWidth: 1,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
     marginTop: 10,
   },
-  secondaryText: { color: COLORS.text, fontSize: 15, fontWeight: "800" },
+  secondaryText: { color: colors.text, fontSize: 15, fontWeight: "800" },
 });

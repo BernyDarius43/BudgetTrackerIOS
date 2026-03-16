@@ -4,16 +4,19 @@ import { View, Text, Pressable, StyleSheet, ActivityIndicator, ScrollView } from
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
 import { useIncomeContext } from "@/context/IncomeContext";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { formatMoney, formatDate } from "@/utils/formatters";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export default function IncomeDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { incomes, deleteIncome } = useIncomeContext();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -55,7 +58,7 @@ export default function IncomeDetailScreen() {
     return (
       <View style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.green} />
+          <ActivityIndicator size="large" color={colors.green} />
           <Text style={styles.loadingText}>Loading income...</Text>
         </View>
       </View>
@@ -86,7 +89,7 @@ export default function IncomeDetailScreen() {
 
             <View style={styles.row}>
               <Text style={styles.label}>Amount</Text>
-              <Text style={[styles.value, { color: COLORS.green, fontWeight: "900" }]}>
+              <Text style={[styles.value, { color: colors.green, fontWeight: "900" }]}>
                 {formatMoney(income.amount)}
               </Text>
             </View>
@@ -129,7 +132,7 @@ export default function IncomeDetailScreen() {
           <View style={styles.actions}>
             <Pressable
               onPress={() => router.push(`/(tabs)/income/edit/${income._id}`)}
-              style={[styles.actionBtn, { backgroundColor: COLORS.green }]}
+              style={[styles.actionBtn, { backgroundColor: colors.green }]}
               disabled={isSubmitting}
             >
               <Text style={styles.actionBtnText}>Edit</Text>
@@ -137,7 +140,7 @@ export default function IncomeDetailScreen() {
 
             <Pressable
               onPress={() => setShowDeleteConfirm(true)}
-              style={[styles.actionBtn, { backgroundColor: COLORS.red }]}
+              style={[styles.actionBtn, { backgroundColor: colors.red }]}
               disabled={isSubmitting}
             >
               <Text style={styles.actionBtnText}>Delete</Text>
@@ -161,8 +164,8 @@ export default function IncomeDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   container: { padding: 18, gap: 16 },
   loadingContainer: {
     flex: 1,
@@ -170,15 +173,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-  loadingText: { color: COLORS.muted, fontSize: 14 },
+  loadingText: { color: colors.muted, fontSize: 14 },
   header: { gap: 12 },
   backButton: { alignSelf: "flex-start" },
-  backButtonText: { color: COLORS.green, fontSize: 16, fontWeight: "700" },
-  title: { color: COLORS.text, fontSize: 28, fontWeight: "800" },
+  backButtonText: { color: colors.green, fontSize: 16, fontWeight: "700" },
+  title: { color: colors.text, fontSize: 28, fontWeight: "800" },
   card: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 20,
     gap: 16,
@@ -189,10 +192,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   column: { gap: 4 },
-  label: { color: COLORS.muted, fontSize: 14, fontWeight: "600" },
-  value: { color: COLORS.text, fontSize: 16, fontWeight: "700", flex: 1, textAlign: "right" },
-  valueMuted: { color: COLORS.muted, fontSize: 14 },
-  divider: { height: 1, backgroundColor: COLORS.line },
+  label: { color: colors.muted, fontSize: 14, fontWeight: "600" },
+  value: { color: colors.text, fontSize: 16, fontWeight: "700", flex: 1, textAlign: "right" },
+  valueMuted: { color: colors.muted, fontSize: 14 },
+  divider: { height: 1, backgroundColor: colors.line },
   actions: { flexDirection: "row", gap: 12 },
   actionBtn: {
     flex: 1,
@@ -200,5 +203,5 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
   },
-  actionBtnText: { color: COLORS.white, fontSize: 16, fontWeight: "800" },
+  actionBtnText: { color: colors.white, fontSize: 16, fontWeight: "800" },
 });

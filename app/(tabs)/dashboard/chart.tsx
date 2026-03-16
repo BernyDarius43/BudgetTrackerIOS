@@ -3,16 +3,19 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { useChartData, MonthlySnapshot } from '@/hooks/useChartData';
 import { FullLineChart } from '@/components/charts/FullLineChart';
 import { MonthlyBreakdown } from '@/components/charts/MonthlyBreakdown';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type TimeRange = '1M' | '3M' | '6M' | '1Y' | 'All';
 
 export default function ChartScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { monthlyData, getDataForRange, hasData, hasCompleteMonth } = useChartData();
 
   const [selectedRange, setSelectedRange] = useState<TimeRange>('6M');
@@ -97,13 +100,13 @@ export default function ChartScreen() {
               </Text>
               <View style={styles.emptyActions}>
                 <Pressable 
-                  style={[styles.emptyButton, { backgroundColor: COLORS.green }]}
+                  style={[styles.emptyButton, { backgroundColor: colors.green }]}
                   onPress={() => router.push('/(tabs)/income/add')}
                 >
                   <Text style={styles.emptyButtonText}>+ Add Income</Text>
                 </Pressable>
                 <Pressable 
-                  style={[styles.emptyButton, { backgroundColor: COLORS.red }]}
+                  style={[styles.emptyButton, { backgroundColor: colors.red }]}
                   onPress={() => router.push('/(tabs)/expense/add')}
                 >
                   <Text style={styles.emptyButtonText}>- Add Expense</Text>
@@ -117,18 +120,18 @@ export default function ChartScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   container: { padding: 18, gap: 16 },
   header: { gap: 6, marginBottom: 8 },
   backButton: { alignSelf: 'flex-start', marginBottom: 8 },
-  backButtonText: { color: COLORS.green, fontSize: 16, fontWeight: '700' },
-  title: { color: COLORS.text, fontSize: 28, fontWeight: '800' },
-  subtitle: { color: COLORS.muted, fontSize: 14 },
+  backButtonText: { color: colors.green, fontSize: 16, fontWeight: '700' },
+  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
+  subtitle: { color: colors.muted, fontSize: 14 },
   
   rangeSelector: {
     flexDirection: 'row',
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderRadius: 12,
     padding: 4,
     gap: 4,
@@ -140,28 +143,28 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   rangeButtonActive: {
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
   },
   rangeButtonText: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 13,
     fontWeight: '700',
   },
   rangeButtonTextActive: {
-    color: COLORS.bg,
+    color: colors.bg,
   },
 
   sectionTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: '800',
     marginBottom: 12,
   },
 
   emptyState: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 40,
     alignItems: 'center',
@@ -169,12 +172,12 @@ const styles = StyleSheet.create({
   },
   emptyIcon: { fontSize: 64 },
   emptyTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 20,
     fontWeight: '800',
   },
   emptyText: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   emptyButtonText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 14,
     fontWeight: '800',
   },

@@ -2,18 +2,21 @@
 import { DashboardOutline, DashboardSolid } from "@/components/icons/DashboardIcons";
 import { MoneyOutline, MoneySolid } from "@/components/icons/MoneyIcons";
 import { Tabs } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { QuickAddModal } from "@/components/modals/QuickAddModal";
 import { useAuth } from "@/context/authContext/authContext";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 
 function CenterAddButton() {
   const [modalVisible, setModalVisible] = useState(false);
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const onPress = async () => {
     try {
@@ -37,7 +40,7 @@ function CenterAddButton() {
             pressed && styles.centerButtonPressed,
           ]}
         >
-          <Ionicons name="add" size={28} color={COLORS.panel} />
+          <Ionicons name="add" size={28} color={colors.panel} />
         </Pressable>
       </View>
 
@@ -51,6 +54,7 @@ function CenterAddButton() {
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
 const { currentUser, authMongoUser } = useAuth();
 const avatarUri =
   authMongoUser?.photoURL || currentUser?.photoURL || undefined;
@@ -63,12 +67,12 @@ const avatarUri =
         headerShown: false,
         tabBarHideOnKeyboard: true,
 
-        tabBarActiveTintColor: COLORS.green,
-        tabBarInactiveTintColor: COLORS.muted,
+        tabBarActiveTintColor: colors.green,
+        tabBarInactiveTintColor: colors.muted,
 
         tabBarStyle: {
-          backgroundColor: COLORS.panel,
-          borderTopColor: COLORS.line,
+          backgroundColor: colors.panel,
+          borderTopColor: colors.line,
           borderTopWidth: 1,
 
           height: tabBarHeight,
@@ -143,7 +147,7 @@ const avatarUri =
       borderRadius: 999,
       padding: 2,
       borderWidth: focused ? 2 : 0,
-      borderColor: focused ? COLORS.green : "transparent",
+      borderColor: focused ? colors.green : "transparent",
     }}
   >
     <Image
@@ -158,7 +162,7 @@ const avatarUri =
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   centerButtonWrap: {
     position: "relative",
     alignItems: "center",
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     alignItems: "center",
     justifyContent: "center",
     transform: [{ translateY: -14 }],

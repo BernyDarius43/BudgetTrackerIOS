@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { MonthlySnapshot } from '@/hooks/useChartData';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 type Props = {
   data: MonthlySnapshot[];
@@ -12,6 +13,8 @@ type Props = {
 export function FullLineChart({ data, onSelectMonth }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [innerSize, setInnerSize] = useState({ w: 0, h: 0 });
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handlePointPress = (index: number) => {
     setSelectedIndex(index);
@@ -162,7 +165,7 @@ export function FullLineChart({ data, onSelectMonth }: Props) {
             <Svg width={innerSize.w} height={innerSize.h} style={StyleSheet.absoluteFill}>
               <Path
                 d={d}
-                stroke={COLORS.green2}
+                stroke={colors.green2}
                 strokeWidth={3}
                 fill="none"
                 strokeLinecap="round"
@@ -211,7 +214,7 @@ export function FullLineChart({ data, onSelectMonth }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { gap: 8 },
   header: {
     flexDirection: 'row',
@@ -219,13 +222,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
   },
-  label: { color: COLORS.text, fontSize: 14, fontWeight: '700' },
-  range: { color: COLORS.muted, fontSize: 11, fontWeight: '700' },
+  label: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  range: { color: colors.muted, fontSize: 11, fontWeight: '700' },
 
   chartWrap: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 14,
     paddingBottom: 32,
@@ -238,14 +241,14 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     height: 1.5,
-    backgroundColor: COLORS.red,
+    backgroundColor: colors.red,
     opacity: 0.5,
   },
   zeroLabel: {
     position: 'absolute',
     right: 0,
     top: -10,
-    color: COLORS.red,
+    color: colors.red,
     fontSize: 9,
     fontWeight: '700',
   },
@@ -257,7 +260,7 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     height: 1,
-    backgroundColor: COLORS.line,
+    backgroundColor: colors.line,
     opacity: 0.3,
   },
 
@@ -274,9 +277,9 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
     borderWidth: 2,
-    borderColor: COLORS.panel2,
+    borderColor: colors.panel2,
   },
   dotSelected: {
     width: 14,
@@ -289,16 +292,16 @@ const styles = StyleSheet.create({
   tooltip: {
     position: 'absolute',
     top: -32,
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: COLORS.green,
+    borderColor: colors.green,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     minWidth: 60,
     alignItems: 'center',
   },
-  tooltipText: { color: COLORS.text, fontSize: 12, fontWeight: '800' },
+  tooltipText: { color: colors.text, fontSize: 12, fontWeight: '800' },
 
   xAxis: {
     position: 'absolute',
@@ -308,13 +311,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  xLabel: { color: COLORS.muted, fontSize: 10, fontWeight: '600' },
-  xLabelSelected: { color: COLORS.green, fontWeight: '800' },
+  xLabel: { color: colors.muted, fontSize: 10, fontWeight: '600' },
+  xLabelSelected: { color: colors.green, fontWeight: '800' },
 
   emptyContainer: {
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
     borderRadius: 18,
     padding: 40,
     alignItems: 'center',
@@ -322,6 +325,6 @@ const styles = StyleSheet.create({
     minHeight: 200,
   },
   emptyText: { fontSize: 48, marginBottom: 16 },
-  emptyTitle: { color: COLORS.text, fontSize: 18, fontWeight: '800', marginBottom: 8 },
-  emptySubtitle: { color: COLORS.muted, fontSize: 14, textAlign: 'center' },
+  emptyTitle: { color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: 8 },
+  emptySubtitle: { color: colors.muted, fontSize: 14, textAlign: 'center' },
 });

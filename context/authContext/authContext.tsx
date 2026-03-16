@@ -9,8 +9,9 @@ import {
   ReactNode,
   useRef,
 } from 'react';
+import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth, {
+import {
   FirebaseAuthTypes,
   signInWithEmailAndPassword,
   onAuthStateChanged,
@@ -18,8 +19,7 @@ import auth, {
   getIdToken,
   getAuth,
 } from '@react-native-firebase/auth';
-import { signUpUser, signOutUser } from '@/services/firebase/firebaseAuth';
-import { router } from 'expo-router';
+import { signUpUser } from '@/services/firebase/firebaseAuth';
 import api from '@/services/api';
 
 export type AuthContextType = {
@@ -42,7 +42,13 @@ export type AuthContextType = {
   logoutUser: () => Promise<void>;
   errorMessage: string;
   clearErrorMessage: () => void;
+  themePreference: ThemePreference;
+  resolvedTheme: ResolvedTheme;
+  setThemePreference: (preference: ThemePreference) => Promise<void>;
 };
+
+export type ThemePreference = 'system' | 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -60,6 +66,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const isRegisteringRef = useRef(false);
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>('system');
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(
+    Appearance.getColorScheme() === 'dark' ? 'dark' : 'light'
+  );
 
   // ✅ Modular API — no more namespaced auth().onAuthStateChanged()
   useEffect(() => {
@@ -68,6 +78,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemTheme(colorScheme === 'dark' ? 'dark' : 'light');
+    });
+
+    return () => subscription.remove();
   }, []);
 
   const clearErrorMessage = useCallback(() => setErrorMessage(''), []);
@@ -84,6 +102,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error saving Mongo user:', error);
     }
   }, []);
+
+  useEffect(() => {
+    const preference = authMongoUser?.preferences?.theme;
+    if (preference === 'light' || preference === 'dark' || preference === 'system') {
+      setThemePreferenceState(preference);
+    } else {
+      setThemePreferenceState('system');
+    }
+  }, [authMongoUser?.preferences?.theme]);
+
+  const setThemePreference = useCallback(
+    async (preference: ThemePreference): Promise<void> => {
+      setThemePreferenceState(preference);
+
+      if (authMongoUser) {
+        const optimisticUser = {
+          ...authMongoUser,
+          preferences: {
+            ...(authMongoUser.preferences || {}),
+            theme: preference,
+          },
+        };
+
+        await setAuthMongoUser(optimisticUser);
+      }
+
+      try {
+        const res = await api.patch('/user/me', {
+          preferences: { theme: preference },
+        });
+
+        if (res?.data?.user) {
+          await setAuthMongoUser(res.data.user);
+        }
+      } catch (error) {
+        console.warn('[Theme] Failed to persist preference:', error);
+      }
+    },
+    [authMongoUser, setAuthMongoUser]
+  );
 
   useEffect(() => {
     const syncMongoUser = async () => {
@@ -134,9 +192,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
 
       // ✅ Modular API — no more firebaseUser.getIdToken()
-      await getIdToken(firebaseUser, true);
+      const token = await getIdToken(firebaseUser, true);
+      console.log('🟢 Frontend: Firebase token:', token);
+      console.log("url called", );
+      
 
-      const res = await api.post('/auth/login');
+      let res = await api.post('/auth/login');
+
+      // ✅ If user exists in Firebase but not MongoDB, auto-register them
+    if (res.status === 404) {
+      console.log('[Login] User not in MongoDB, auto-registering...');
+      await api.post('/auth/register');
+      res = await api.post('/auth/login');
+    }
 
       if (res.status === 200) {
         const mongoUser = res.data.user;
@@ -269,6 +337,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [setAuthMongoUser]
   );
 
+  const resolvedTheme: ResolvedTheme =
+    themePreference === 'system' ? systemTheme : themePreference;
+
   const value = useMemo(
     () => ({
       userLoggedIn: !!currentUser,
@@ -284,6 +355,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       logoutUser,
       errorMessage,
       clearErrorMessage,
+      themePreference,
+      resolvedTheme,
+      setThemePreference,
     }),
     [
       currentUser,
@@ -293,6 +367,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       errorMessage,
       clearErrorMessage,
+      themePreference,
+      resolvedTheme,
+      setThemePreference,
     ]
   );
 

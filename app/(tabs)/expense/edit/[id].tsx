@@ -4,12 +4,15 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useExpenseContext } from "@/context/ExpenseContext";
 import { EditTransactionScreen } from "@/components/transactions/EditTransactionScreen";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export default function EditExpenseRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { expenses } = useExpenseContext();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const expense = useMemo(() => {
     return expenses.find((exp) => exp._id === id);
@@ -18,7 +21,7 @@ export default function EditExpenseRoute() {
   if (!expense) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={COLORS.red} />
+        <ActivityIndicator size="large" color={colors.red} />
       </View>
     );
   }
@@ -32,11 +35,12 @@ export default function EditExpenseRoute() {
   );
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: COLORS.bg,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    loading: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.bg,
+    },
+  });

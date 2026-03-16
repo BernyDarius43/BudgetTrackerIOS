@@ -1,46 +1,42 @@
 {
   "expo": {
-    "name": "budgettrackerios",
+    "name": "BudgetTracker",
     "slug": "budget-tracker",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon-BT.png",
+    "icon": "./assets/images/icon2.PNG",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "buildNumber": "1.0.1",
+      "buildNumber": "2",
       "supportsTablet": true,
       "bundleIdentifier": "com.dariusmotion.budgettrackerios",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "googleServicesFile": "./GoogleService-Info.plist"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dariusmotion.budgettrackerios",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.dariusmotion.budgettrackerios"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/icon-BT.png"
+      "favicon": "./assets/images/favicon2.png"
     },
     "plugins": [
       "expo-router",
-      "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-icon.PNG",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0A0A0A"
         }
       ],
       [
@@ -68,10 +64,10 @@
     },
     "owner": "motion_db",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "updates": {
-      "url": "https://u.expo.dev/087761e9-6d53-48b2-a9b3-960a15a1c3d1"
+      "url": "https://u.expo.dev/9f413944-91a5-43dc-b33e-7068bd00c7e0"
     }
   }
 }

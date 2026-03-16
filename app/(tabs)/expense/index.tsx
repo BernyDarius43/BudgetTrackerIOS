@@ -1,17 +1,18 @@
 // app/(tabs)/expense/index.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useExpenseContext } from '@/context/ExpenseContext';
-import { COLORS } from '@/constants/Colors';
+import { type ThemeColors } from '@/constants/Colors';
 import { formatMoney, formatDate } from '@/utils/formatters';
 import { TransactionRow } from '@/components/common/TransactionRow';
 import { TransactionCard } from '@/components/common/TransactionCard';
 import { SortSheet } from '@/components/common/SortSheet';
 import { FilterSheet, hasActiveFilters } from '@/components/common/FilterSheet';
 import { useTransactionControls } from '@/hooks/useTransactionControls';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 const EXPENSE_CATEGORIES = [
   'Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
@@ -26,6 +27,8 @@ export default function ExpenseScreen() {
   const insets = useSafeAreaInsets();
   const { totalExpenses, expenses, getExpenses } = useExpenseContext();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => { getExpenses(); }, []);
 
@@ -60,14 +63,14 @@ export default function ExpenseScreen() {
           {/* Total Card */}
           <View style={styles.totalCard}>
             <Text style={styles.totalLabel}>Total Expenses</Text>
-            <Text style={[styles.totalAmount, { color: COLORS.red }]}>
+            <Text style={[styles.totalAmount, { color: colors.red }]}>
               -{formatMoney(total)} CAD
             </Text>
           </View>
 
           {/* Add Button */}
           <Pressable
-            style={[styles.addButton, { backgroundColor: COLORS.red }]}
+            style={[styles.addButton, { backgroundColor: colors.red }]}
             onPress={() => router.push('/(tabs)/expense/add')}
           >
             <Text style={styles.addButtonText}>+ Add Expense</Text>
@@ -88,7 +91,7 @@ export default function ExpenseScreen() {
                 style={styles.controlBtn}
                 onPress={() => setSortSheetOpen(true)}
               >
-                <Ionicons name="swap-vertical-outline" size={18} color={COLORS.text} />
+                <Ionicons name="swap-vertical-outline" size={18} color={colors.text} />
               </Pressable>
 
               {/* Filter */}
@@ -99,7 +102,7 @@ export default function ExpenseScreen() {
                 <Ionicons
                   name="options-outline"
                   size={18}
-                  color={filtersActive ? COLORS.green : COLORS.text}
+                  color={filtersActive ? colors.green : colors.text}
                 />
                 {filtersActive && <View style={styles.filterDot} />}
               </Pressable>
@@ -110,13 +113,13 @@ export default function ExpenseScreen() {
                   onPress={() => setViewMode('list')}
                   style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
                 >
-                  <Ionicons name="list-outline" size={18} color={viewMode === 'list' ? COLORS.green : COLORS.muted} />
+                  <Ionicons name="list-outline" size={18} color={viewMode === 'list' ? colors.green : colors.muted} />
                 </Pressable>
                 <Pressable
                   onPress={() => setViewMode('card')}
                   style={[styles.toggleBtn, viewMode === 'card' && styles.toggleBtnActive]}
                 >
-                  <Ionicons name="grid-outline" size={18} color={viewMode === 'card' ? COLORS.green : COLORS.muted} />
+                  <Ionicons name="grid-outline" size={18} color={viewMode === 'card' ? colors.green : colors.muted} />
                 </Pressable>
               </View>
             </View>
@@ -154,7 +157,7 @@ export default function ExpenseScreen() {
             )
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color={COLORS.muted} />
+              <Ionicons name="receipt-outline" size={48} color={colors.muted} />
               <Text style={styles.emptyText}>
                 {filtersActive ? 'No results match your filters' : 'No expenses yet'}
               </Text>
@@ -188,57 +191,57 @@ export default function ExpenseScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
   container: { padding: 18, gap: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { color: COLORS.text, fontSize: 28, fontWeight: '800' },
+  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
   totalCard: {
-    backgroundColor: COLORS.panel, borderWidth: 1,
-    borderColor: COLORS.line, borderRadius: 18, padding: 20,
+    backgroundColor: colors.panel, borderWidth: 1,
+    borderColor: colors.line, borderRadius: 18, padding: 20,
   },
-  totalLabel: { color: COLORS.muted, fontSize: 13, marginBottom: 8 },
+  totalLabel: { color: colors.muted, fontSize: 13, marginBottom: 8 },
   totalAmount: { fontSize: 32, fontWeight: '900' },
   addButton: { padding: 16, borderRadius: 14, alignItems: 'center' },
-  addButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '800' },
+  addButtonText: { color: colors.white, fontSize: 16, fontWeight: '800' },
   sectionHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginTop: 8,
   },
-  sectionTitle: { color: COLORS.text, fontSize: 16, fontWeight: '800' },
-  count: { color: COLORS.muted, fontSize: 12, marginTop: 2 },
+  sectionTitle: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  count: { color: colors.muted, fontSize: 12, marginTop: 2 },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   controlBtn: {
     width: 36, height: 36, borderRadius: 10,
-    backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
-  controlBtnActive: { borderColor: COLORS.green },
+  controlBtnActive: { borderColor: colors.green },
   filterDot: {
     position: 'absolute', top: 6, right: 6,
     width: 7, height: 7, borderRadius: 4,
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green,
   },
   viewToggle: {
-    flexDirection: 'row', backgroundColor: COLORS.panel,
-    borderWidth: 1, borderColor: COLORS.line,
+    flexDirection: 'row', backgroundColor: colors.panel,
+    borderWidth: 1, borderColor: colors.line,
     borderRadius: 10, overflow: 'hidden',
   },
   toggleBtn: { paddingHorizontal: 10, paddingVertical: 6 },
-  toggleBtnActive: { backgroundColor: COLORS.panel2 },
+  toggleBtnActive: { backgroundColor: colors.panel2 },
   listContainer: {
     borderRadius: 18, overflow: 'hidden',
-    backgroundColor: COLORS.panel, borderWidth: 1, borderColor: COLORS.line,
+    backgroundColor: colors.panel, borderWidth: 1, borderColor: colors.line,
   },
   dateHeader: {
-    color: COLORS.muted, fontSize: 11, fontWeight: '700',
+    color: colors.muted, fontSize: 11, fontWeight: '700',
     letterSpacing: 0.8, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4,
   },
   emptyState: {
     padding: 32, alignItems: 'center', gap: 12,
-    backgroundColor: COLORS.panel2, borderWidth: 1,
-    borderColor: COLORS.line, borderRadius: 18,
+    backgroundColor: colors.panel2, borderWidth: 1,
+    borderColor: colors.line, borderRadius: 18,
   },
-  emptyText: { color: COLORS.text, fontSize: 15, fontWeight: '700', textAlign: 'center' },
-  clearFilters: { color: COLORS.green, fontSize: 14, fontWeight: '700' },
+  emptyText: { color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' },
+  clearFilters: { color: colors.green, fontSize: 14, fontWeight: '700' },
 });

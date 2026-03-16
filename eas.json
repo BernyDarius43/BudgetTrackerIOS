@@ -8,7 +8,7 @@
     "base": {
       "node": "22.14.0",
       "env": {
-        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+        "API_URL": "/api/v1"
       },
       "ios": {
         "image": "latest",
@@ -23,7 +23,8 @@
       "distribution": "internal",
       "extends": "base",
       "env": {
-        "API_URL": "https://budgettrackerapi-development.up.railway.app/api/v1"
+        "API_URL": "/api/v1",
+        "EXPO_PUBLIC_API_BASE_URL": "https://budgettrackerapi-muxo.onrender.com"
       }
     },
     "preview": {
@@ -31,7 +32,8 @@
       "extends": "base",
       "distribution": "internal",
       "env": {
-        "API_URL": "http://192.168.2.16:1738/api/v1"
+        "API_URL": "/api/v1",
+        "EXPO_PUBLIC_API_BASE_URL": "https://budgettrackerapi-muxo.onrender.com"
       }
     },
     "production": {
@@ -40,7 +42,8 @@
       "extends": "base",
       "node": "22.14.0",
       "env": {
-        "API_URL": "https://budgettrackerapi-production.up.railway.app/api/v1"
+        "API_URL": "/api/v1",
+        "EXPO_PUBLIC_API_BASE_URL": "https://budgettrackerapi-1-utry.onrender.com"
       }
     },
     "ios": {

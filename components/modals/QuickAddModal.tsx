@@ -1,5 +1,5 @@
 // components/modals/QuickAddModal.tsx
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Modal,
   View,
@@ -9,8 +9,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { COLORS } from "@/constants/Colors";
+import { type ThemeColors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 type Props = {
   visible: boolean;
@@ -19,6 +20,8 @@ type Props = {
 
 export function QuickAddModal({ visible, onClose }: Props) {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleAddIncome = () => {
     onClose();
@@ -55,7 +58,7 @@ export function QuickAddModal({ visible, onClose }: Props) {
                   hitSlop={12}
                   style={styles.closeButton}
                 >
-                  <Ionicons name="close" size={24} color={COLORS.muted} />
+                  <Ionicons name="close" size={24} color={colors.muted} />
                 </Pressable>
               </View>
 
@@ -107,7 +110,7 @@ export function QuickAddModal({ visible, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -116,13 +119,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   content: {
-    backgroundColor: COLORS.panel,
+    backgroundColor: colors.panel,
     borderRadius: 24,
     padding: 24,
     width: "100%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: COLORS.line,
+    borderColor: colors.line,
   },
   header: {
     flexDirection: "row",
@@ -131,7 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 24,
     fontWeight: "800",
   },
@@ -139,7 +142,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   subtitle: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 14,
     marginBottom: 24,
   },
@@ -154,12 +157,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   incomeButton: {
-    backgroundColor: COLORS.pillBg,
-    borderColor: COLORS.green,
+    backgroundColor: colors.pillBg,
+    borderColor: colors.green,
   },
   expenseButton: {
     backgroundColor: "rgba(239, 68, 68, 0.1)",
-    borderColor: COLORS.red,
+    borderColor: colors.red,
   },
   buttonPressed: {
     opacity: 0.7,
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.panel2,
+    backgroundColor: colors.panel2,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
@@ -178,12 +181,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   actionTitle: {
-    color: COLORS.text,
+    color: colors.text,
     fontSize: 18,
     fontWeight: "800",
   },
   actionSubtitle: {
-    color: COLORS.muted,
+    color: colors.muted,
     fontSize: 13,
   },
 });

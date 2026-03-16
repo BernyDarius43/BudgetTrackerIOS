@@ -192,9 +192,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
 
       // ✅ Modular API — no more firebaseUser.getIdToken()
-      await getIdToken(firebaseUser, true);
+      const token = await getIdToken(firebaseUser, true);
+      console.log('🟢 Frontend: Firebase token:', token);
+      console.log("url called", );
+      
 
-      const res = await api.post('/auth/login');
+      let res = await api.post('/auth/login');
+
+      // ✅ If user exists in Firebase but not MongoDB, auto-register them
+    if (res.status === 404) {
+      console.log('[Login] User not in MongoDB, auto-registering...');
+      await api.post('/auth/register');
+      res = await api.post('/auth/login');
+    }
 
       if (res.status === 200) {
         const mongoUser = res.data.user;

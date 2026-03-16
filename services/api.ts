@@ -3,10 +3,10 @@ import axios, { AxiosHeaders } from 'axios';
 import { getAuth, getIdToken } from '@react-native-firebase/auth';
 import Constants from 'expo-constants';
 
-const rawBaseUrl =
+const BaseUrl =
   Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL ||
   'https://budgettrackerapi-muxo.onrender.com'; // Fallback URL if env variable is missing
-const normalizedBaseUrl = rawBaseUrl.replace(/\/$/, '');
+const normalizedBaseUrl = BaseUrl.replace(/\/$/, '');
 const baseURL = normalizedBaseUrl.endsWith('/api/v1')
   ? normalizedBaseUrl
   : `${normalizedBaseUrl}/api/v1`;
@@ -65,6 +65,6 @@ export async function getMe() {
 }
 
 export async function updateMe(payload: UpdateMePayload) {
-  const res = await api.put(`/user/me`, payload);
+  const res = await api.patch(`/user/me`, payload);
   return res.data;
 }

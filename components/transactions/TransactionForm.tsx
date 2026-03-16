@@ -150,6 +150,9 @@ export function TransactionForm({
 }
 
 function FieldLabel({ label, error, required }: { label: string; error?: string; required?: boolean }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.labelRow}>
       <Text style={styles.label}>

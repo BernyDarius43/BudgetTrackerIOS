@@ -8,12 +8,12 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "buildNumber": "2",
       "supportsTablet": true,
       "bundleIdentifier": "com.dariusmotion.budgettrackerios",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {

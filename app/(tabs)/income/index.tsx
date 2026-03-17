@@ -56,7 +56,7 @@ export default function IncomeScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Income</Text>
+            <Text style={styles.title}>Incomes</Text>
           </View>
 
           {/* Total Card */}
@@ -78,7 +78,7 @@ export default function IncomeScreen() {
           {/* Section header + controls */}
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionTitle}>All Income</Text>
+              <Text style={styles.sectionTitle}>All Incomes</Text>
               <Text style={styles.count}>
                 {processed.length} of {incomes.length} entries
               </Text>

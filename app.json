@@ -29,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
         "expo-splash-screen",
@@ -64,7 +65,7 @@
     },
     "owner": "motion_db",
     "runtimeVersion": {
-      "policy": "fingerprint"
+      "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/9f413944-91a5-43dc-b33e-7068bd00c7e0"

@@ -40,9 +40,6 @@ yarn-error.*
 # Firebase Admin SDK (CRITICAL - NEVER COMMIT!)
 *-firebase-adminsdk-*.json
 
-# Google Service-Info.plist  (CRITICAL - NEVER COMMIT!)
-GoogleService-Info.plist
-
 # Personal docs  (CRITICAL - NEVER COMMIT!)
 docs/
 

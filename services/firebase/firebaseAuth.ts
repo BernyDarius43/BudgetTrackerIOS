@@ -1,8 +1,7 @@
 // services/firebase/firebaseAuth.ts
-import {
+import auth, {
   FirebaseAuthTypes,
   createUserWithEmailAndPassword,
-  getAuth,
   signInWithEmailAndPassword,
   signOut,
 } from '@react-native-firebase/auth';
@@ -12,7 +11,7 @@ export const signUpUser = async (
   password: string,
   displayName?: string
 ): Promise<FirebaseAuthTypes.User> => {
-  const userCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
+  const userCredential = await createUserWithEmailAndPassword(auth(), email, password);
   const user = userCredential.user;
 
   if (displayName) {
@@ -26,10 +25,10 @@ export const signInUser = async (
   email: string,
   password: string
 ): Promise<FirebaseAuthTypes.User> => {
-  const userCredential = await signInWithEmailAndPassword(getAuth(), email, password);
+  const userCredential = await signInWithEmailAndPassword(auth(), email, password);
   return userCredential.user;
 };
 
 export const signOutUser = async (): Promise<void> => {
-  await signOut(getAuth());
+  await signOut(auth());
 };

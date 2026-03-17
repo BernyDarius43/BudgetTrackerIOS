@@ -11,13 +11,12 @@ import {
 } from 'react';
 import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
+import auth, {
   FirebaseAuthTypes,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
   getIdToken,
-  getAuth,
 } from '@react-native-firebase/auth';
 import { signUpUser } from '@/services/firebase/firebaseAuth';
 import api from '@/services/api';
@@ -73,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ✅ Modular API — no more namespaced auth().onAuthStateChanged()
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+    const unsubscribe = onAuthStateChanged(auth(), (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
@@ -187,7 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const userCredential = await signInWithEmailAndPassword(getAuth(), email, password);
+      const userCredential = await signInWithEmailAndPassword(auth(), email, password);
       const firebaseUser = userCredential.user;
       console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
 
@@ -241,7 +240,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signUpUser(trimmedEmail, password);
 
       // ✅ Modular API — no more auth().currentUser
-      const user = getAuth().currentUser;
+      const user = auth().currentUser;
       if (!user) {
         throw new Error('Firebase user is not available after sign up.');
       }
@@ -281,8 +280,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Step 2 — ✅ Modular API — no more auth().currentUser / auth().signOut()
-      if (getAuth().currentUser) {
-        await signOut(getAuth());
+      if (auth().currentUser) {
+        await signOut(auth());
         console.log('[Logout] Firebase logout successful');
       }
 
@@ -313,7 +312,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       phoneNumber?: string;
     }) => {
       // ✅ Modular API — no more auth().currentUser
-      const user = getAuth().currentUser;
+      const user = auth().currentUser;
       if (!user) return;
 
       if (displayName || photoURL) {

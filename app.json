@@ -12,8 +12,7 @@
       "bundleIdentifier": "com.dariusmotion.budgettrackerios",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "googleServicesFile": "./GoogleService-Info.plist"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +28,6 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-firebase/auth",
       [
         "expo-splash-screen",
         {
@@ -37,16 +35,6 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#0A0A0A"
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static",
-            "buildReactNativeFromSource": true,
-            "modularHeaders": true
-          }
         }
       ],
       "@react-native-community/datetimepicker"

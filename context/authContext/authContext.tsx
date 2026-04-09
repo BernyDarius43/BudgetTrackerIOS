@@ -1,4 +1,5 @@
 // context/authContext/authContext.tsx
+
 import {
   createContext,
   useContext,
@@ -11,21 +12,23 @@ import {
 } from 'react';
 import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import auth, {
-  FirebaseAuthTypes,
+import { auth } from '@/services/firebase/firebaseConfig';
+import {
+  User,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
   getIdToken,
-} from '@react-native-firebase/auth';
+} from 'firebase/auth';
 import { signUpUser } from '@/services/firebase/firebaseAuth';
 import api from '@/services/api';
+import { pingUntilAlive } from '@/services/pingServer'; // ✅ NEW
 
 export type AuthContextType = {
   userLoggedIn: boolean;
   isEmailUser: boolean;
-  currentUser: FirebaseAuthTypes.User | null;
-  setCurrentUser: (user: FirebaseAuthTypes.User | null) => void;
+  currentUser: User | null;
+  setCurrentUser: (user: User | null) => void;
   authMongoUser: any;
   setAuthMongoUser: (user: any) => Promise<void>;
   updateUserProfile: (data: {
@@ -36,6 +39,7 @@ export type AuthContextType = {
     phoneNumber?: string;
   }) => Promise<void>;
   loading: boolean;
+  serverWaking: boolean; // ✅ NEW — true while ping is in progress
   loginUser: (email: string, password: string) => Promise<void>;
   registerUser: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logoutUser: () => Promise<void>;
@@ -60,30 +64,31 @@ export const useAuth = (): AuthContextType => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authMongoUser, setAuthMongoUserState] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [serverWaking, setServerWaking] = useState<boolean>(false); // ✅ NEW
   const [errorMessage, setErrorMessage] = useState<string>('');
   const isRegisteringRef = useRef(false);
+  const hasSyncedRef = useRef(false);
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>('system');
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(
     Appearance.getColorScheme() === 'dark' ? 'dark' : 'light'
   );
 
-  // ✅ Modular API — no more namespaced auth().onAuthStateChanged()
+  // ✅ Auth listener — unchanged
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth(), (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       setSystemTheme(colorScheme === 'dark' ? 'dark' : 'light');
     });
-
     return () => subscription.remove();
   }, []);
 
@@ -123,7 +128,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             theme: preference,
           },
         };
-
         await setAuthMongoUser(optimisticUser);
       }
 
@@ -131,7 +135,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const res = await api.patch('/user/me', {
           preferences: { theme: preference },
         });
-
         if (res?.data?.user) {
           await setAuthMongoUser(res.data.user);
         }
@@ -142,76 +145,64 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [authMongoUser, setAuthMongoUser]
   );
 
-  useEffect(() => {
-    const syncMongoUser = async () => {
-      if (!currentUser) return;
+  // 🔄 Sync Mongo user — with ping
+useEffect(() => {
+  const syncMongoUser = async () => {
+    if (!currentUser) return;
+    if (isRegisteringRef.current) return;
+    if (hasSyncedRef.current) return;
 
-      if (isRegisteringRef.current) {
-        console.log('[Mongo] Skipping refresh during registration');
+    hasSyncedRef.current = true;
+
+    try {
+      setServerWaking(true);
+      const isAlive = await pingUntilAlive(6, 8000);
+      setServerWaking(false);
+
+      if (!isAlive) {
+        setErrorMessage('Server is unavailable. Please try again later.');
         return;
       }
 
-      try {
-        const response = await api.post('/auth/refresh');
-
-        if (response.status === 200) {
-          await setAuthMongoUser(response.data.user);
-          console.log('[Mongo] Refreshed user on app start');
-        }
-      } catch (err: any) {
-        const status = err?.response?.status;
-
-        if (status === 404) {
-          console.log('[Mongo] User not found yet (expected during onboarding)');
-          return;
-        }
-
-        console.error('[Mongo] Refresh failed:', err?.message);
-        await setAuthMongoUser(null);
-        setErrorMessage('Failed to sync user data. Please log in again.');
+      const response = await api.post('/auth/refresh');
+      if (response.status === 200) {
+        await setAuthMongoUser(response.data.user);
       }
-    };
-
-    if (currentUser) {
-      syncMongoUser();
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 404) return;
+      await setAuthMongoUser(null);
+      setErrorMessage('Failed to sync user data. Please log in again.');
+    } finally {
+      setServerWaking(false);
     }
-  }, [currentUser, setAuthMongoUser]);
+  };
 
+  if (currentUser) {
+    syncMongoUser();
+  }
+}, [currentUser?.uid, setAuthMongoUser]); // ✅ uid is a stable string, not an object reference
+  // All other functions (loginUser, registerUser, logoutUser, updateUserProfile)
   const loginUser = async (email: string, password: string) => {
     setErrorMessage('');
     setLoading(true);
+
     try {
-      if (!email || !password) {
-        setErrorMessage('Email and password are required.');
-        return;
-      }
-
-      const userCredential = await signInWithEmailAndPassword(auth(), email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
-      console.log('🟢 Frontend: Firebase user logged in:', firebaseUser.uid);
-
-      // ✅ Modular API — no more firebaseUser.getIdToken()
-      const token = await getIdToken(firebaseUser, true);
-      console.log('🟢 Frontend: Firebase token:', token);
-      console.log("url called", );
-      
+      const token = await getIdToken(firebaseUser, false);
 
       let res = await api.post('/auth/login');
 
-      // ✅ If user exists in Firebase but not MongoDB, auto-register them
-    if (res.status === 404) {
-      console.log('[Login] User not in MongoDB, auto-registering...');
-      await api.post('/auth/register');
-      res = await api.post('/auth/login');
-    }
+      if (res.status === 404) {
+        await api.post('/auth/register');
+        res = await api.post('/auth/login');
+      }
 
       if (res.status === 200) {
-        const mongoUser = res.data.user;
-        await setAuthMongoUser(mongoUser);
-        console.log('✅ Login successful');
+        await setAuthMongoUser(res.data.user);
       }
     } catch (err: any) {
-      console.error('[Login] failed:', err?.message);
       setErrorMessage(err?.message || 'Login failed.');
     } finally {
       setLoading(false);
@@ -221,9 +212,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const registerUser = async (email: string, password: string, confirmPassword: string) => {
     setErrorMessage('');
 
-    const trimmedEmail = email.trim().toLowerCase();
-
-    if (!trimmedEmail || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword) {
       setErrorMessage('Please fill out all fields');
       return;
     }
@@ -237,31 +226,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isRegisteringRef.current = true;
 
     try {
-      await signUpUser(trimmedEmail, password);
-
-      // ✅ Modular API — no more auth().currentUser
-      const user = auth().currentUser;
-      if (!user) {
-        throw new Error('Firebase user is not available after sign up.');
-      }
-
-      // ✅ Modular API — no more user.getIdToken()
-      await getIdToken(user, true);
-
+      const user = await signUpUser(email, password);
+      await getIdToken(user, false);
       const res = await api.post('/auth/register');
-
-      if (!res?.data?.user) {
-        throw new Error('MongoDB user not returned by /auth/register.');
-      }
-
+      if (!res?.data?.user) throw new Error('MongoDB user not returned.');
       await setAuthMongoUser(res.data.user);
-      console.log('✅ Registration successful');
     } catch (error: any) {
-      const backendMsg =
-        error?.response?.data?.error ||
-        error?.response?.data?.detail ||
-        error?.message;
-      setErrorMessage(backendMsg || 'Sign up failed.');
+      setErrorMessage(error?.message || 'Sign up failed.');
     } finally {
       setLoading(false);
       isRegisteringRef.current = false;
@@ -271,67 +242,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logoutUser = async () => {
     setLoading(true);
     try {
-      // Step 1 — backend logout while token is still valid
-      try {
-        await api.post('/auth/logout');
-        console.log('[Logout] Backend logout successful');
-      } catch (error) {
-        console.warn('[Logout] Backend logout failed (non-critical):', error);
-      }
-
-      // Step 2 — ✅ Modular API — no more auth().currentUser / auth().signOut()
-      if (auth().currentUser) {
-        await signOut(auth());
-        console.log('[Logout] Firebase logout successful');
-      }
-
-      // Step 3 — clear Mongo user from state + AsyncStorage
+      try { await api.post('/auth/logout'); } catch {}
+      if (auth.currentUser) await signOut(auth);
       await setAuthMongoUser(null);
-      console.log('[Logout] Logout complete');
-
-    } catch (error: any) {
-      console.error('[Logout] Error:', error);
-      setErrorMessage('Error while logging out. Please try again.');
+      hasSyncedRef.current = false; // ✅ reset so next login triggers sync
+    } catch {
+      setErrorMessage('Error while logging out.');
     } finally {
       setLoading(false);
     }
   };
 
   const updateUserProfile = useCallback(
-    async ({
-      uid,
-      displayName,
-      email,
-      photoURL,
-      phoneNumber,
-    }: {
-      uid: string;
-      displayName: string;
-      email: string;
-      photoURL?: string;
-      phoneNumber?: string;
-    }) => {
-      // ✅ Modular API — no more auth().currentUser
-      const user = auth().currentUser;
+    async ({ displayName, email, photoURL }: any) => {
+      const user = auth.currentUser;
       if (!user) return;
-
-      if (displayName || photoURL) {
-        await user.updateProfile({ displayName, photoURL });
-      }
-
-      if (email && user.email !== email) {
-        await user.updateEmail(email);
-      }
-
-      const res = await api.patch('/user/me', {
-        displayName,
-        photoURL,
-        phoneNumber,
-      });
-
-      if (res?.data?.user) {
-        await setAuthMongoUser(res.data.user);
-      }
+      const res = await api.patch('/user/me', { displayName, photoURL });
+      if (res?.data?.user) await setAuthMongoUser(res.data.user);
     },
     [setAuthMongoUser]
   );
@@ -349,6 +276,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthMongoUser,
       updateUserProfile,
       loading,
+      serverWaking, // ✅ NEW
       loginUser,
       registerUser,
       logoutUser,
@@ -364,6 +292,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthMongoUser,
       updateUserProfile,
       loading,
+      serverWaking, // ✅ NEW
       errorMessage,
       clearErrorMessage,
       themePreference,

@@ -130,9 +130,9 @@ export const IncomeProvider = ({ children }: { children: ReactNode }): JSX.Eleme
   );
 
   // Function to calculate total income.
-  const totalIncome = (): number => {
-    return incomes.reduce((total, income) => total + income.amount, 0);
-  };
+const totalIncome = useCallback((): number => {
+  return incomes.reduce((total, income) => total + income.amount, 0);
+}, [incomes]); // ✅ stable reference — only changes when incomes changes
 
   // Memoize the context value to prevent unnecessary re-renders.
   const value: IncomeContextType = useMemo(() => ({

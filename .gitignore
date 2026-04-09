@@ -33,6 +33,9 @@ yarn-error.*
 .env
 .env.*
 !.env.example
+.env.local
+.env.development
+.env.production
 
 # TypeScript
 *.tsbuildinfo
@@ -47,6 +50,10 @@ docs/
 *.tmp
 *.log
 prod.txt
+
+# Firebase iOS config - NEVER COMMIT!
+GoogleService-Info.plist
+google-services.json
 
 # IDE
 .vscode/

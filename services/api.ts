@@ -1,70 +1,45 @@
 // services/api.ts
 import axios, { AxiosHeaders } from 'axios';
-import auth, {  getIdToken } from '@react-native-firebase/auth';
-import Constants from 'expo-constants';
+import { auth } from '@/services/firebase/firebaseConfig';
+import { getIdToken } from 'firebase/auth';
 
 const BaseUrl =
-  Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL ||
-  'https://budgettrackerapi-muxo.onrender.com'; // Fallback URL if env variable is missing
-const normalizedBaseUrl = BaseUrl.replace(/\/$/, '');
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  'https://budgettrackerapi-muxo.onrender.com';
+
+// ✅ Export this so pingServer.ts can use the ROOT url (not /api/v1)
+export const normalizedBaseUrl = BaseUrl.replace(/\/$/, '');
+
 const baseURL = normalizedBaseUrl.endsWith('/api/v1')
   ? normalizedBaseUrl
   : `${normalizedBaseUrl}/api/v1`;
 
 const api = axios.create({
   baseURL,
-  timeout: 15000,
+  timeout: 60000, // ✅ Increased from 15s to 60s to survive Render cold start
 });
 
-api.interceptors.request.use(
-  async (config) => {
-    const existingAuth =
-      (config.headers instanceof AxiosHeaders && config.headers.get('Authorization')) ||
-      (!(config.headers instanceof AxiosHeaders) && (config.headers as any)?.Authorization);
+console.log('🌐 API baseURL:', baseURL);
 
-    if (existingAuth) return config;
+api.interceptors.request.use(async (config) => {
+  try {
+    const user = auth.currentUser;
 
-    // ✅ Modular API — no more auth().currentUser
-    const user = auth().currentUser;
-    if (!user) {
-      throw new Error('Not authenticated: Firebase user is missing.');
-    }
+    if (user) {
+      const token = await getIdToken(user, false); // ✅ Use cached token for better performance
 
-    // ✅ Modular API — no more user.getIdToken()
-    const idToken = await getIdToken(user);
+      if (!config.headers) {
+        config.headers = new AxiosHeaders();
+      }
 
-    if (config.headers instanceof AxiosHeaders) {
-      config.headers.set('Authorization', `Bearer ${idToken}`);
-    } else {
-      (config.headers as any) = {
-        ...(config.headers as any),
-        Authorization: `Bearer ${idToken}`,
-      };
+      config.headers.set('Authorization', `Bearer ${token}`);
     }
 
     return config;
-  },
-  (error) => Promise.reject(error)
-);
+  } catch (error) {
+    console.error('Error attaching token:', error);
+    return config;
+  }
+});
 
 export default api;
-
-export type UpdateMePayload = {
-  displayName?: string;
-  photoURL?: string;
-  phoneNumber?: string;
-  preferences?: {
-    theme?: 'light' | 'dark' | 'system';
-    currency?: string;
-  };
-};
-
-export async function getMe() {
-  const res = await api.get(`/user/me`);
-  return res.data;
-}
-
-export async function updateMe(payload: UpdateMePayload) {
-  const res = await api.patch(`/user/me`, payload);
-  return res.data;
-}

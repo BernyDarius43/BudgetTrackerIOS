@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   Pressable,
-  ActivityIndicator,
   StyleSheet,
   Image,
 } from "react-native";
@@ -17,9 +16,10 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { PRESET_AVATARS } from "@/constants/avatars";
 import api from "@/services/api";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { SkeletonBlock, SkeletonForm } from "@/components/skeletons";
 
 export default function EditProfileScreen() {
-  const { currentUser, updateUserProfile, authMongoUser } = useAuth();
+  const { currentUser, updateUserProfile, authMongoUser, loading } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
@@ -139,11 +139,21 @@ export default function EditProfileScreen() {
     }
   };
   
-  if (!currentUser) {
+  if (loading && !authMongoUser) {
     return (
-      <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.green} />
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <View style={styles.loaderContainer}>
+          <View style={styles.skeletonShell}>
+            <View style={styles.avatarGrid}>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <SkeletonBlock key={index} width={56} height={56} borderRadius={28} />
+              ))}
+            </View>
+            <SkeletonBlock width={140} height={22} borderRadius={8} />
+            <SkeletonForm fieldCount={3} buttonCount={2} />
+          </View>
         </View>
+      </SafeAreaView>
     );
   }
 
@@ -205,7 +215,7 @@ export default function EditProfileScreen() {
           disabled={!canSave}
         >
           {saving ? (
-            <ActivityIndicator color={colors.bg} />
+            <SkeletonBlock width={92} height={14} borderRadius={6} />
           ) : (
             <Text style={styles.buttonText}>Save Changes</Text>
           )}
@@ -221,7 +231,8 @@ export default function EditProfileScreen() {
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 18 },
+  skeletonShell: { width: '100%', gap: 14 },
 
   container: { flex: 1, padding: 18, gap: 10 },
   title: { color: colors.text, fontSize: 22, fontWeight: "900", marginBottom: 8 },

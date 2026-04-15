@@ -1,16 +1,17 @@
 // app/(tabs)/income/edit/[id].tsx
 import React, { useMemo } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useIncomeContext } from "@/context/IncomeContext";
 import { EditTransactionScreen } from "@/components/transactions/EditTransactionScreen";
 import { type ThemeColors } from "@/constants/Colors";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { SkeletonForm } from "@/components/skeletons";
 
 export default function EditIncomeRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { incomes } = useIncomeContext();
+  const { incomes, loading } = useIncomeContext();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -18,10 +19,10 @@ export default function EditIncomeRoute() {
     return incomes.find((inc) => inc._id === id);
   }, [incomes, id]);
 
-  if (!income) {
+  if (loading || !income) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.green} />
+        <SkeletonForm fieldCount={5} buttonCount={2} />
       </View>
     );
   }

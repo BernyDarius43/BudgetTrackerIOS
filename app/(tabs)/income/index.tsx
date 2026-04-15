@@ -13,6 +13,7 @@ import { FilterSheet, hasActiveFilters } from '@/components/common/FilterSheet';
 import { useTransactionControls } from '@/hooks/useTransactionControls';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonBlock, SkeletonTransactionList } from '@/components/skeletons';
 
 const INCOME_CATEGORIES = [
   'Salary', 'Freelance', 'Business', 'Investment',
@@ -23,7 +24,7 @@ type ViewMode = 'list' | 'card';
 
 export default function IncomeScreen() {
   const router = useRouter();
-  const { totalIncome, incomes, getAllIncomes } = useIncomeContext();
+  const { totalIncome, incomes, getAllIncomes, loading } = useIncomeContext();
   const insets = useSafeAreaInsets();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const colors = useThemeColors();
@@ -46,6 +47,37 @@ export default function IncomeScreen() {
 
   const total = totalIncome ? totalIncome() : 0;
   const filtersActive = hasActiveFilters(filters);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <View style={styles.safe}>
+          <View style={styles.container}>
+            <View style={styles.header}>
+              <SkeletonBlock width={120} height={28} borderRadius={10} />
+            </View>
+
+            <View style={styles.totalCard}>
+              <SkeletonBlock width={92} height={12} borderRadius={6} />
+              <SkeletonBlock width={160} height={32} borderRadius={10} style={{ marginTop: 8 }} />
+            </View>
+
+            <SkeletonBlock width="100%" height={52} borderRadius={14} />
+
+            <View style={styles.sectionHeader}>
+              <View style={{ gap: 8 }}>
+                <SkeletonBlock width={110} height={16} borderRadius={6} />
+                <SkeletonBlock width={86} height={12} borderRadius={6} />
+              </View>
+              <SkeletonBlock width={120} height={36} borderRadius={10} />
+            </View>
+
+            <SkeletonTransactionList rowCount={4} />
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>

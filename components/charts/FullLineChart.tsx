@@ -4,13 +4,15 @@ import Svg, { Path } from 'react-native-svg';
 import { type ThemeColors } from '@/constants/Colors';
 import { MonthlySnapshot } from '@/hooks/useChartData';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonChart } from '@/components/skeletons/SkeletonChart';
 
 type Props = {
   data: MonthlySnapshot[];
   onSelectMonth?: (month: MonthlySnapshot) => void;
+  isLoading?: boolean;
 };
 
-export function FullLineChart({ data, onSelectMonth }: Props) {
+export function FullLineChart({ data, onSelectMonth, isLoading = false }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [innerSize, setInnerSize] = useState({ w: 0, h: 0 });
   const colors = useThemeColors();
@@ -111,6 +113,10 @@ export function FullLineChart({ data, onSelectMonth }: Props) {
   /**
    * Early returns AFTER hooks (safe)
    */
+  if (isLoading) {
+    return <SkeletonChart />;
+  }
+
   if (!data.length) {
     return (
       <View style={styles.emptyContainer}>

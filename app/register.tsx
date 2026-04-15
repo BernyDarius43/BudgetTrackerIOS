@@ -6,13 +6,13 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/authContext/authContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SkeletonBlock } from "@/components/skeletons";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -102,7 +102,7 @@ export default function RegisterScreen() {
               disabled={!canSubmit}
             >
               {loading ? (
-                <ActivityIndicator color="#0B0D10" />
+                <SkeletonBlock width={88} height={14} borderRadius={6} />
               ) : (
                 <Text style={styles.primaryBtnText}>Sign Up</Text>
               )}

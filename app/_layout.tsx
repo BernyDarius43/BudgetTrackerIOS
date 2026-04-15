@@ -11,7 +11,7 @@ import { COLORS } from '@/constants/Colors';
 
 SplashScreen.preventAutoHideAsync();
 
-function SkeletonBlock({ w, height, borderRadius = 12, style }: {
+/* function SkeletonBlock({ w, height, borderRadius = 12, style }: {
   w: number | string;
   height: number;
   borderRadius?: number;
@@ -36,9 +36,9 @@ function SkeletonBlock({ w, height, borderRadius = 12, style }: {
       ]}
     />
   );
-}
+} */
 
-function SkeletonScreen({ serverWaking }: { serverWaking: boolean }) {
+/* function SkeletonScreen({ serverWaking }: { serverWaking: boolean }) {
   return (
     <View style={sk.container}>
       <Text style={sk.appName}>BudgetTracker</Text>
@@ -80,7 +80,7 @@ function SkeletonScreen({ serverWaking }: { serverWaking: boolean }) {
       </View>
     </View>
   );
-}
+} */
 
 function AuthHandler() {
   const router = useRouter();
@@ -109,7 +109,7 @@ function AuthHandler() {
   return null;
 }
 
-function LoadingGate() {
+/* function LoadingGate() {
   const { loading, serverWaking } = useAuth();
 
   if (loading) {
@@ -117,7 +117,7 @@ function LoadingGate() {
   }
 
   return <Slot />;
-}
+} */
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -138,7 +138,7 @@ export default function RootLayout() {
     <AuthProvider>
       <GlobalProvider>
         <AuthHandler />
-        <LoadingGate />
+        <Slot/>
         <Toast />
       </GlobalProvider>
     </AuthProvider>

@@ -25,8 +25,8 @@ export type WeeklySnapshot = {
 };
 
 export function useFinancialData() {
-  const { incomes } = useIncomeContext();
-  const { expenses } = useExpenseContext();
+  const { incomes, loading: incomesLoading } = useIncomeContext();
+  const { expenses, loading: expensesLoading } = useExpenseContext();
 
   const allTransactions = useMemo<MergedTransaction[]>(
     () => [...incomes, ...expenses],
@@ -230,5 +230,6 @@ export function useFinancialData() {
     getDataForRange,
     hasData: transactionsByDateAsc.length > 0,
     hasCompleteMonth: monthlyData.some((m) => m.isComplete),
+    isLoading: incomesLoading || expensesLoading,
   };
 }

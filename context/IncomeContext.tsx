@@ -38,6 +38,7 @@ export type UpdateIncomeDto = Partial<CreateIncomeDto>;
 export interface IncomeContextType {
   incomes: Income[];
   error: string | null;
+  loading: boolean;
 
   addIncome: (income: CreateIncomeDto) => Promise<Income>;
   getAllIncomes: () => Promise<Income[]>;
@@ -53,8 +54,10 @@ const IncomeContext = createContext<IncomeContextType | undefined>(undefined);
 export const IncomeProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
    const getAllIncomes = useCallback(async (): Promise<Income[]> => {
+    setLoading(true);
     try {
       const response = await api.get<Income[]>("/fetchAllIncomes");
       if (response.status === 200) {
@@ -67,6 +70,8 @@ export const IncomeProvider = ({ children }: { children: ReactNode }): JSX.Eleme
     } catch (err: any) {
       setError(err?.response?.data?.message || "Error fetching incomes");
       throw err;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -138,12 +143,13 @@ const totalIncome = useCallback((): number => {
   const value: IncomeContextType = useMemo(() => ({
     incomes,
     error,
+    loading,
     addIncome,
     getAllIncomes,
     deleteIncome,
     updateIncome,
     totalIncome,
-  }), [incomes, error, addIncome, getAllIncomes, deleteIncome, updateIncome, totalIncome]);
+  }), [incomes, error, loading, addIncome, getAllIncomes, deleteIncome, updateIncome, totalIncome]);
 
   return (
     <IncomeContext.Provider value={value}>

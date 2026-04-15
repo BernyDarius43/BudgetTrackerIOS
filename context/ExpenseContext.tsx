@@ -46,6 +46,7 @@ export type UpdateExpenseDto = Partial<CreateExpenseDto>;
 export interface ExpenseContextType {
   expenses: Expense[];
   error: string | null;
+  loading: boolean;
 
   addExpense: (expense: CreateExpenseDto) => Promise<Expense>;
   getExpenses: () => Promise<Expense[]>;
@@ -60,8 +61,10 @@ const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getExpenses = useCallback(async (): Promise<Expense[]> => {
+    setLoading(true);
     try {
       const response = await api.get<Expense[]>("/fetchAllExpense");
 
@@ -75,6 +78,8 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       setError(err?.response?.data?.message || "Error fetching expenses");
       throw err;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -153,6 +158,7 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       expenses,
       error,
+      loading,
       addExpense,
       getExpenses,
       deleteExpense,
@@ -162,6 +168,7 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
     [
       expenses,
       error,
+      loading,
       addExpense,
       getExpenses,
       deleteExpense,

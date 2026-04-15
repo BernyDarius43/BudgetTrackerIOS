@@ -1,6 +1,6 @@
 // app/(tabs)/income/[id].tsx
 import React, { useCallback, useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
@@ -9,12 +9,13 @@ import { useIncomeContext } from "@/context/IncomeContext";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { formatMoney, formatDate } from "@/utils/formatters";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { SkeletonBlock, SkeletonCard } from "@/components/skeletons";
 
 export default function IncomeDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { incomes, deleteIncome } = useIncomeContext();
+  const { incomes, deleteIncome, loading } = useIncomeContext();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -54,12 +55,18 @@ export default function IncomeDetailScreen() {
   }, [income, deleteIncome, router]);
 
   // Loading state
-  if (!income) {
+  if (loading || !income) {
     return (
       <View style={styles.safe}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.green} />
-          <Text style={styles.loadingText}>Loading income...</Text>
+          <View style={styles.skeletonShell}>
+            <SkeletonBlock width={120} height={28} borderRadius={10} />
+            <SkeletonCard />
+            <View style={styles.actions}>
+              <SkeletonBlock width="48%" height={52} borderRadius={14} />
+              <SkeletonBlock width="48%" height={52} borderRadius={14} />
+            </View>
+          </View>
         </View>
       </View>
     );
@@ -172,6 +179,10 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
+  },
+  skeletonShell: {
+    width: "100%",
+    gap: 14,
   },
   loadingText: { color: colors.muted, fontSize: 14 },
   header: { gap: 12 },

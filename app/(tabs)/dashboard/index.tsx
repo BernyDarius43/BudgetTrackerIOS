@@ -13,6 +13,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { useIncomeContext } from '@/context/IncomeContext';
 import { useExpenseContext } from '@/context/ExpenseContext';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { DashboardSkeleton } from '@/components/skeletons/DashboardSkeleton';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -22,7 +23,14 @@ export default function DashboardScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   
-  const { totalBalance, recentTransactions, chartValues, changeFromLastMonth, isEmpty } = useDashboardData();
+  const {
+    totalBalance,
+    recentTransactions,
+    chartValues,
+    changeFromLastMonth,
+    isEmpty,
+    isLoading,
+  } = useDashboardData();
 
   useFocusEffect(
   useCallback(() => {
@@ -35,6 +43,10 @@ Subsequent visits refresh normally */
     }
   }, [getAllIncomes, getExpenses, isEmpty])
 );
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
@@ -81,7 +93,7 @@ Subsequent visits refresh normally */
         </View>
 
         <View style={styles.txPanel}>
-          {!isEmpty? (
+          {!isEmpty ? (
             recentTransactions.map((tx) => (
               <TransactionRow 
                 key={tx._id} 

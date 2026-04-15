@@ -13,6 +13,7 @@ export function useChartData() {
     getDataForRange,
     hasData,
     hasCompleteMonth,
+    isLoading,
   } = useFinancialData();
 
   return {
@@ -22,6 +23,7 @@ export function useChartData() {
     getDataForRange,
     hasData,
     hasCompleteMonth,
+    isLoading,
   };
 }
 

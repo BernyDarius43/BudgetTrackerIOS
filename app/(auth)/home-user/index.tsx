@@ -8,9 +8,10 @@ import { useIncomeContext } from "@/context/IncomeContext";
 import { useExpenseContext } from "@/context/ExpenseContext";
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonBlock, SkeletonCard } from '@/components/skeletons';
 
 export default function HomePageUserScreen() {
-  const { currentUser, userLoggedIn, authMongoUser } = useAuth();
+  const { currentUser, userLoggedIn, authMongoUser, serverWaking } = useAuth();
   const router = useRouter();
   const { getAllIncomes } = useIncomeContext();
   const { getExpenses } = useExpenseContext();
@@ -21,7 +22,10 @@ export default function HomePageUserScreen() {
   const hasFetchedRef = useRef(false); // ✅ run-once guard
 
   useEffect(() => {
+    // Wait until the backend is awake AND the Mongo user is hydrated.
     if (!userLoggedIn) return;
+    if (serverWaking) return;
+    if (!authMongoUser) return;
     if (hasFetchedRef.current) return; // ✅ never run twice
 
     hasFetchedRef.current = true;
@@ -31,9 +35,32 @@ export default function HomePageUserScreen() {
         await Promise.all([getAllIncomes(), getExpenses()]);
       } catch (err: any) {
         console.error('[home-user] bootstrap fetch failed:', err?.message);
+        // Allow a manual retry (pull-to-refresh) if the first try failed.
+        hasFetchedRef.current = false;
       }
     })();
-  }, [userLoggedIn, getAllIncomes, getExpenses]); // ✅ currentUser removed
+  }, [userLoggedIn, authMongoUser, serverWaking, getAllIncomes, getExpenses]); // ✅ guarded fetch
+
+  if (serverWaking || !authMongoUser) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <View style={[styles.container, { paddingBottom: insets.bottom + 16 }]}>
+          <View style={styles.welcomeCard}>
+            <SkeletonBlock width={92} height={16} borderRadius={6} />
+            <SkeletonBlock width="68%" height={32} borderRadius={10} style={{ marginTop: 10 }} />
+            <SkeletonBlock width={180} height={16} borderRadius={6} style={{ marginTop: 10 }} />
+          </View>
+
+          <SkeletonBlock width="100%" height={56} borderRadius={14} />
+
+          <View style={styles.quickActions}>
+            <SkeletonCard compact />
+            <SkeletonCard compact />
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>

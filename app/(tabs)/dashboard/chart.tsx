@@ -8,6 +8,7 @@ import { useChartData, MonthlySnapshot } from '@/hooks/useChartData';
 import { FullLineChart } from '@/components/charts/FullLineChart';
 import { MonthlyBreakdown } from '@/components/charts/MonthlyBreakdown';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonMonthlyBreakdown } from '@/components/skeletons/SkeletonMonthlyBreakdown';
 
 type TimeRange = '1M' | '3M' | '6M' | '1Y' | 'All';
 
@@ -16,7 +17,7 @@ export default function ChartScreen() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { monthlyData, getDataForRange, hasData, hasCompleteMonth } = useChartData();
+  const { monthlyData, getDataForRange, hasData, hasCompleteMonth, isLoading } = useChartData();
 
   const [selectedRange, setSelectedRange] = useState<TimeRange>('6M');
   const [selectedMonth, setSelectedMonth] = useState<MonthlySnapshot | null>(null);
@@ -80,18 +81,23 @@ export default function ChartScreen() {
           <FullLineChart 
             data={chartData} 
             onSelectMonth={setSelectedMonth}
+            isLoading={isLoading}
           />
 
           {/* Monthly Breakdown */}
-          {displayMonth && (
+          {(isLoading || displayMonth) && (
             <View style={{ marginTop: 24 }}>
               <Text style={styles.sectionTitle}>Monthly Breakdown</Text>
-              <MonthlyBreakdown month={displayMonth} />
+              {isLoading ? (
+                <SkeletonMonthlyBreakdown />
+              ) : (
+                displayMonth && <MonthlyBreakdown month={displayMonth} />
+              )}
             </View>
           )}
 
           {/* Empty State */}
-          {!hasData && (
+          {!hasData && !isLoading && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>📊</Text>
               <Text style={styles.emptyTitle}>No Data Yet</Text>

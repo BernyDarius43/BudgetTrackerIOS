@@ -9,6 +9,7 @@ export function useDashboardData() {
     weeklyData,
     changeFromLastMonth,
     hasData,
+    isLoading,
   } = useFinancialData();
 
   // Chart values from weekly data
@@ -27,5 +28,6 @@ export function useDashboardData() {
     chartValues,
     changeFromLastMonth, // ✅ NEW: Change from last month's end
     isEmpty,
+    isLoading,
   };
 }

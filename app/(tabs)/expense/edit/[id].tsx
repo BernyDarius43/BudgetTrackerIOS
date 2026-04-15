@@ -1,16 +1,17 @@
 // app/(tabs)/expense/edit/[id].tsx
 import React, { useMemo } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useExpenseContext } from "@/context/ExpenseContext";
 import { EditTransactionScreen } from "@/components/transactions/EditTransactionScreen";
 import { type ThemeColors } from "@/constants/Colors";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { SkeletonForm } from "@/components/skeletons";
 
 export default function EditExpenseRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { expenses } = useExpenseContext();
+  const { expenses, loading } = useExpenseContext();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -18,10 +19,10 @@ export default function EditExpenseRoute() {
     return expenses.find((exp) => exp._id === id);
   }, [expenses, id]);
 
-  if (!expense) {
+  if (loading || !expense) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.red} />
+        <SkeletonForm fieldCount={5} buttonCount={2} />
       </View>
     );
   }

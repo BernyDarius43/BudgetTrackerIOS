@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 import { type ThemeColors } from '@/constants/Colors';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonBlock, SkeletonCard } from '@/components/skeletons';
+
 export default function ProfileScreen() {
   const {
     currentUser,
@@ -28,6 +30,40 @@ export default function ProfileScreen() {
     }
     return themePreference[0].toUpperCase() + themePreference.slice(1);
   }, [themePreference, resolvedTheme]);
+
+  if (loading && !authMongoUser) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <View style={[styles.safe]}>
+          <ScrollView
+            contentContainerStyle={[styles.container, { paddingBottom: insets.bottom + 16 }]}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.header}>
+              <SkeletonBlock width={90} height={30} borderRadius={10} />
+            </View>
+
+            <View style={styles.profileCard}>
+              <SkeletonBlock width={80} height={80} borderRadius={40} />
+              <SkeletonBlock width={160} height={24} borderRadius={10} style={{ marginTop: 16 }} />
+              <SkeletonBlock width={200} height={14} borderRadius={6} style={{ marginTop: 10 }} />
+              <SkeletonBlock width={92} height={26} borderRadius={999} style={{ marginTop: 14 }} />
+            </View>
+
+            <View style={styles.section}>
+              <SkeletonBlock width={180} height={16} borderRadius={6} style={{ marginBottom: 12 }} />
+              <SkeletonCard />
+            </View>
+
+            <View style={styles.section}>
+              <SkeletonBlock width={140} height={16} borderRadius={6} style={{ marginBottom: 12 }} />
+              <SkeletonCard />
+            </View>
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const handleLogout = async () => {
     Alert.alert(
@@ -160,22 +196,19 @@ export default function ProfileScreen() {
 
         {/* Actions */}
         <View style={styles.section}>
-          <Pressable 
-            style={styles.actionButton}
-            onPress={() => router.push("/(tabs)/profile/edit-profile")}
-          >
-            <Text style={styles.actionButtonText}>Edit Profile</Text>
-          </Pressable>
-
-          <Pressable 
-            style={[styles.actionButton, styles.dangerButton]}
-            onPress={handleLogout}
-            disabled={loading}
-          >
-            <Text style={[styles.actionButtonText, styles.dangerButtonText]}>
-              {loading ? 'Logging out...' : 'Logout'}
-            </Text>
-          </Pressable>
+        <Pressable 
+  style={[styles.actionButton, styles.dangerButton]}
+  onPress={handleLogout}
+  disabled={loading}
+>
+  {loading ? (
+    <SkeletonBlock width={92} height={14} borderRadius={6} />
+  ) : (
+    <Text style={[styles.actionButtonText, styles.dangerButtonText]}>
+      Logout
+    </Text>
+  )}
+</Pressable>
         </View>
 
         {/* Theme Sheet */}

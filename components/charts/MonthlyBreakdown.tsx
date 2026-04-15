@@ -4,14 +4,21 @@ import { View, Text, StyleSheet } from 'react-native';
 import { type ThemeColors } from '@/constants/Colors';
 import { MonthlySnapshot } from '@/hooks/useChartData';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { SkeletonMonthlyBreakdown } from '@/components/skeletons/SkeletonMonthlyBreakdown';
 
 type Props = {
   month: MonthlySnapshot;
+  isLoading?: boolean;
 };
 
-export function MonthlyBreakdown({ month }: Props) {
+export function MonthlyBreakdown({ month, isLoading = false }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  if (isLoading) {
+    return <SkeletonMonthlyBreakdown />;
+  }
+
   const isPositive = month.netCashFlow >= 0;
   const earnedMore = month.totalIncome > month.totalExpenses;
 

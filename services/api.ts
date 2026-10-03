@@ -25,9 +25,13 @@ api.interceptors.request.use(async (config) => {
   try {
     const user = auth.currentUser;
 
+     // 🔍 DEBUG
+    console.log('[api] Request interceptor fired for:', config.url);
+    console.log('[api] auth.currentUser:', user ? `uid=${user.uid}` : 'NULL — no token will be attached');
+
     if (user) {
       const token = await getIdToken(user, false); // ✅ Use cached token for better performance
-
+      console.log('[api] Token attached ✅');
       if (!config.headers) {
         config.headers = new AxiosHeaders();
       }
@@ -38,6 +42,7 @@ api.interceptors.request.use(async (config) => {
     return config;
   } catch (error) {
     console.error('Error attaching token:', error);
+    console.warn('[api] ⚠️ No currentUser — request will be sent WITHOUT Authorization header');
     return config;
   }
 });

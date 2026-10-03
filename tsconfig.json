@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "moduleSuffixes": [".ios", ".android", ".native", ".web", ""],
     "paths": {
       "@/*": [
         "./*"
@@ -14,5 +15,8 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "docs"
   ]
 }

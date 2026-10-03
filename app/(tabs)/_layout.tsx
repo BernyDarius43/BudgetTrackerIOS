@@ -3,7 +3,7 @@ import { DashboardOutline, DashboardSolid } from "@/components/icons/DashboardIc
 import { MoneyOutline, MoneySolid } from "@/components/icons/MoneyIcons";
 import { Tabs } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Image, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Image, View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { type ThemeColors } from "@/constants/Colors";
 import * as Haptics from "expo-haptics";
@@ -136,6 +136,14 @@ const avatarUri =
 
         }}
       />
+
+      <Tabs.Screen
+  name="budget"
+  options={{
+    title: "Budget",
+    tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>🎯</Text>,
+  }}
+/>
 
       <Tabs.Screen
         name="profile"

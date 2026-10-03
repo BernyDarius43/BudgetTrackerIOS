@@ -5,21 +5,21 @@ import { useExpenseContext, type Expense } from '@/context/ExpenseContext';
 export type MergedTransaction = Income | Expense;
 
 export type MonthlySnapshot = {
-  month: string; // "2026-01" format
-  monthLabel: string; // "January 2026"
+  month: string;
+  monthLabel: string;
   endBalance: number;
   totalIncome: number;
   totalExpenses: number;
-  netCashFlow: number; // income - expenses
+  netCashFlow: number;
   changeFromPrevious: number;
   transactionCount: number;
-  isComplete: boolean; // false if current month
-  isPartial: boolean; // true if has transactions but incomplete
+  isComplete: boolean;
+  isPartial: boolean;
 };
 
 export type WeeklySnapshot = {
-  week: number; // 1-4
-  weekLabel: string; // "Week 1"
+  week: number;
+  weekLabel: string;
   balance: number;
   date: Date;
 };
@@ -28,6 +28,12 @@ export function useFinancialData() {
   const { incomes, loading: incomesLoading } = useIncomeContext();
   const { expenses, loading: expensesLoading } = useExpenseContext();
 
+   // 🔍 DEBUG — remove after diagnosis
+  console.log('[useFinancialData] incomesLoading:', incomesLoading, '| incomes.length:', incomes.length);
+  console.log('[useFinancialData] expensesLoading:', expensesLoading, '| expenses.length:', expenses.length);
+  console.log('[useFinancialData] isLoading:', incomesLoading || expensesLoading);
+  console.log('[FinancialData] incomesLoading:', incomesLoading, 'expensesLoading:', expensesLoading);
+  // 🔍 END DEBUG
   const allTransactions = useMemo<MergedTransaction[]>(
     () => [...incomes, ...expenses],
     [incomes, expenses]
@@ -195,14 +201,15 @@ export function useFinancialData() {
   }, [monthlyData, transactionsByDateAsc]);
 
   const changeFromLastMonth = useMemo(() => {
-    if (monthlyData.length === 0) return 0;
-    if (monthlyData.length === 1) return monthlyData[0].endBalance;
+    if (monthlyData.length < 2) return 0;
 
     const currentMonth = monthlyData[monthlyData.length - 1];
     const lastMonth = monthlyData[monthlyData.length - 2];
 
     return currentMonth.endBalance - lastMonth.endBalance;
   }, [monthlyData]);
+
+  const hasComparisonMonth = monthlyData.length > 1;
 
   const getDataForRange = (range: '1M' | '3M' | '6M' | '1Y' | 'All') => {
     if (range === 'All') return monthlyData;
@@ -227,6 +234,7 @@ export function useFinancialData() {
     monthlyData,
     weeklyData,
     changeFromLastMonth,
+    hasComparisonMonth,
     getDataForRange,
     hasData: transactionsByDateAsc.length > 0,
     hasCompleteMonth: monthlyData.some((m) => m.isComplete),

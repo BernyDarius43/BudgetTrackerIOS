@@ -6,16 +6,11 @@ import { TransactionForm, TransactionFormErrors, TransactionFormValues } from ".
 import { useIncomeContext } from "@/context/IncomeContext";
 import { useExpenseContext } from "@/context/ExpenseContext";
 
-/**
- * If your backend *requires* `type`, we can send it safely.
- * If it does NOT require it, it will be ignored or overwritten by the backend.
- */
 type Props = {
   mode: "Income" | "Expense";
 };
 
 function todayISO(): string {
-  // YYYY-MM-DD (we later normalize to ISO)
   const d = new Date();
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -45,7 +40,7 @@ export function AddTransactionScreen({ mode }: Props) {
   const onChange = useCallback(
     <K extends keyof TransactionFormValues>(key: K, value: TransactionFormValues[K]) => {
       setValues((prev) => ({ ...prev, [key]: value }));
-      setErrors((prev) => ({ ...prev, [key]: undefined })); // clear field error as user edits
+      setErrors((prev) => ({ ...prev, [key]: undefined }));
     },
     []
   );
@@ -61,7 +56,6 @@ export function AddTransactionScreen({ mode }: Props) {
     else if (Number.isNaN(amountNum)) next.amount = "Must be a number";
     else if (amountNum <= 0) next.amount = "Must be > 0";
 
-    // Accept YYYY-MM-DD; normalize to ISO on submit
     const dateStr = values.date.trim();
     if (!dateStr) next.date = "Required";
     else if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) next.date = "Use YYYY-MM-DD";
@@ -79,8 +73,6 @@ export function AddTransactionScreen({ mode }: Props) {
     try {
       const amount = Number(values.amount);
 
-      // Normalize date to ISO string at midnight UTC-ish
-      // (Simple approach: append T00:00:00.000Z)
       const isoDate = `${values.date.slice(0, 10)}T00:00:00.000Z`;
 
       const payloadBase = {
@@ -89,7 +81,6 @@ export function AddTransactionScreen({ mode }: Props) {
         date: isoDate,
         category: values.category.trim(),
         description: values.description?.trim() || "",
-        // Optional if backend wants it:
         type: mode,
       };
 
@@ -109,7 +100,6 @@ export function AddTransactionScreen({ mode }: Props) {
         });
       }
 
-      // Navigate back to list screen
       router.replace(primaryRoute);
     } catch (e: any) {
       const message =

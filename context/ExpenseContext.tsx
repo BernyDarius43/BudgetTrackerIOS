@@ -1,4 +1,3 @@
-// context/ExpenseContext.tsx
 import React, {
   createContext,
   useContext,
@@ -6,33 +5,24 @@ import React, {
   ReactNode,
   useMemo,
   useCallback,
-} from "react";
-import api from "@/services/api";
+} from 'react';
+import api from '@/services/api';
 
-/**
- * Shared transaction discriminator
- */
-export type TransactionType = "Income" | "Expense";
+export type TransactionType = 'Income' | 'Expense';
 
-/**
- * READ MODEL (what backend returns)
- */
 export interface Expense {
   _id: string;
-  uid: string;                 // server-owned
+  uid: string;
   title: string;
   amount: number;
-  type: "Expense";             // strict
-  date: string;                // ISO string recommended
+  type: 'Expense';
+  date: string;
   category: string;
   description?: string;
-  createdAt: string;           // server-owned
-  updatedAt?: string;          // server-owned
+  createdAt: string;
+  updatedAt?: string;
 }
 
-/**
- * WRITE MODELS / DTOs (what frontend is allowed to send)
- */
 export type CreateExpenseDto = {
   title: string;
   amount: number;
@@ -47,12 +37,10 @@ export interface ExpenseContextType {
   expenses: Expense[];
   error: string | null;
   loading: boolean;
-
   addExpense: (expense: CreateExpenseDto) => Promise<Expense>;
   getExpenses: () => Promise<Expense[]>;
   deleteExpense: (id: string) => Promise<void>;
   updateExpense: (id: string, expense: UpdateExpenseDto) => Promise<Expense>;
-
   totalExpenses: () => number;
 }
 
@@ -61,94 +49,77 @@ const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const getExpenses = useCallback(async (): Promise<Expense[]> => {
+     console.log('[ExpenseContext] getExpenses called'); // 🔍
     setLoading(true);
     try {
-      const response = await api.get<Expense[]>("/fetchAllExpense");
-
+      const response = await api.get<Expense[]>('/fetchAllExpense');
+console.log('[ExpenseContext] Response status:', response.status, '| count:', response.data.length); // 🔍
       if (response.status === 200) {
         setExpenses(response.data);
         return response.data;
       }
 
-      setError("Unexpected response while fetching expenses");
+      setError('Unexpected response while fetching expenses');
       return [];
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Error fetching expenses");
+       console.error('[ExpenseContext] getExpenses ERROR:', err?.response?.status, err?.message); // 🔍
+      setError(err?.response?.data?.message || 'Error fetching expenses');
       throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const addExpense = useCallback(
-    async (expense: CreateExpenseDto): Promise<Expense> => {
-      try {
-        const response = await api.post<Expense>("/add-expense", expense);
+  const addExpense = useCallback(async (expense: CreateExpenseDto): Promise<Expense> => {
+    try {
+      const response = await api.post<Expense>('/add-expense', expense);
 
-        if (response.status === 201 || response.status === 200) {
-          await getExpenses();
-          return response.data;
-        }
-
-        throw new Error("Unexpected response while adding expense");
-      } catch (err: any) {
-        setError(err?.response?.data?.message || "Error adding expense");
-        throw err;
+      if (response.status === 201 || response.status === 200) {
+        setExpenses((prev) => [response.data, ...prev.filter((item) => item._id !== response.data._id)]);
+        return response.data;
       }
-    },
-    [getExpenses]
-  );
 
-  const deleteExpense = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        const response = await api.delete(`/delete-expense/${id}`);
+      throw new Error('Unexpected response while adding expense');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Error adding expense');
+      throw err;
+    }
+  }, []);
 
-        if (response.status === 200) {
-          await getExpenses();
-          return;
-        }
+  const deleteExpense = useCallback(async (id: string): Promise<void> => {
+    try {
+      const response = await api.delete(`/delete-expense/${id}`);
 
-        throw new Error("Unexpected response while deleting expense");
-      } catch (err: any) {
-        setError(err?.response?.data?.message || "Error deleting expense");
-        throw err;
+      if (response.status === 200) {
+        setExpenses((prev) => prev.filter((item) => item._id !== id));
+        return;
       }
-    },
-    [getExpenses]
-  );
 
-  const updateExpense = useCallback(
-    async (id: string, expense: UpdateExpenseDto): Promise<Expense> => {
-      try {
-        const response = await api.put<Expense>(
-          `/update-expense/${id}`,
-          expense
-        );
+      throw new Error('Unexpected response while deleting expense');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Error deleting expense');
+      throw err;
+    }
+  }, []);
 
-        if (response.status === 200) {
-          setExpenses((prev) =>
-            prev.map((exp) => (exp._id === id ? response.data : exp))
-          );
-          await getExpenses();
-          return response.data;
-        }
+  const updateExpense = useCallback(async (id: string, expense: UpdateExpenseDto): Promise<Expense> => {
+    try {
+      const response = await api.put<Expense>(`/update-expense/${id}`, expense);
 
-        throw new Error("Unexpected response while updating expense");
-      } catch (err: any) {
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Error updating expense"
-        );
-        throw err;
+      if (response.status === 200) {
+        setExpenses((prev) => prev.map((exp) => (exp._id === id ? response.data : exp)));
+        return response.data;
       }
-    },
-    [getExpenses]
-  );
+
+      throw new Error('Unexpected response while updating expense');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || 'Error updating expense');
+      throw err;
+    }
+  }, []);
 
   const totalExpenses = useCallback((): number => {
     return expenses.reduce((total, expense) => total + expense.amount, 0);
@@ -165,29 +136,16 @@ export const ExpenseProvider = ({ children }: { children: ReactNode }) => {
       updateExpense,
       totalExpenses,
     }),
-    [
-      expenses,
-      error,
-      loading,
-      addExpense,
-      getExpenses,
-      deleteExpense,
-      updateExpense,
-      totalExpenses,
-    ]
+    [expenses, error, loading, addExpense, getExpenses, deleteExpense, updateExpense, totalExpenses]
   );
 
-  return (
-    <ExpenseContext.Provider value={value}>
-      {children}
-    </ExpenseContext.Provider>
-  );
+  return <ExpenseContext.Provider value={value}>{children}</ExpenseContext.Provider>;
 };
 
 export const useExpenseContext = (): ExpenseContextType => {
   const context = useContext(ExpenseContext);
   if (context === undefined) {
-    throw new Error("useExpenseContext must be used within an ExpenseProvider");
+    throw new Error('useExpenseContext must be used within an ExpenseProvider');
   }
   return context;
 };

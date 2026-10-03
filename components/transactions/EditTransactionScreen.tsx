@@ -1,4 +1,3 @@
-// components/transactions/EditTransactionScreen.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
@@ -28,10 +27,9 @@ export function EditTransactionScreen({ mode, transaction, onCancel }: Props) {
   });
   const [errors, setErrors] = useState<TransactionFormErrors>({});
 
-  // Load transaction data into form
   useEffect(() => {
     if (transaction) {
-      const dateStr = transaction.date.slice(0, 10); // Extract YYYY-MM-DD
+      const dateStr = transaction.date.slice(0, 10);
       setValues({
         title: transaction.title,
         amount: String(transaction.amount),
@@ -83,7 +81,6 @@ export function EditTransactionScreen({ mode, transaction, onCancel }: Props) {
       const amount = Number(values.amount);
       const isoDate = `${values.date.slice(0, 10)}T00:00:00.000Z`;
 
-      // ✅ CRITICAL: Only include description if it has content
       const payload: any = {
         title: values.title.trim(),
         amount,
@@ -92,7 +89,6 @@ export function EditTransactionScreen({ mode, transaction, onCancel }: Props) {
         description: values.description?.trim() || "",
       };
 
-      // Only add description if it's not empty
       const trimmedDescription = values.description?.trim();
       if (trimmedDescription) {
         payload.description = trimmedDescription;
@@ -114,7 +110,6 @@ export function EditTransactionScreen({ mode, transaction, onCancel }: Props) {
         });
       }
 
-      // Navigate back to detail view (forces refresh)
       router.back();
     } catch (e: any) {
       const message =

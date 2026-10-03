@@ -3,15 +3,11 @@ import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { IncomeProvider, useIncomeContext, type Income } from "./IncomeContext";
 import { ExpenseProvider, useExpenseContext, type Expense } from "./ExpenseContext";
 
-/**
- * A strict union type for dashboard/global usage.
- * This is the "read model" coming from your backend.
- */
 export type Transaction = Income | Expense;
 
 export interface GlobalContextType {
   totalBalance: number;
-  transactionHistory: Transaction[]; // most recent N transactions
+  transactionHistory: Transaction[];
   totalIncome: number;
   totalExpenses: number;
 }
@@ -34,14 +30,12 @@ const GlobalContextProvider = ({ children }: GlobalContextProviderProps) => {
   }, [totalIncome, totalExpenses]);
 
   const transactionHistory = useMemo<Transaction[]>(() => {
-    // Merge and sort by createdAt desc
     const history: Transaction[] = [...incomes, ...expenses].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
       return dateB - dateA;
     });
 
-    // Return the 3 most recent transactions (same behavior you had)
     return history.slice(0, 3);
   }, [incomes, expenses]);
 
@@ -55,9 +49,6 @@ const GlobalContextProvider = ({ children }: GlobalContextProviderProps) => {
   return <GlobalContext.Provider value={value}>{children}</GlobalContext.Provider>;
 };
 
-/**
- * Wraps Income + Expense providers and exposes derived global values
- */
 export const GlobalProvider = ({ children }: { children: ReactNode }) => {
   return (
     <IncomeProvider>

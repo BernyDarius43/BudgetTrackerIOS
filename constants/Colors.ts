@@ -41,7 +41,7 @@ export const Colors = {
   },
 } as const;
 
-export type ThemeColors = typeof Colors.dark;
+export type ThemeColors = (typeof Colors.light) | (typeof Colors.dark);
 export type ColorKey = keyof ThemeColors;
 
 // Backwards-compatible default (dark theme)
